@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+.pic{display:block;max-width:100%;height:auto;border-radius:14px;margin:6px 0}.pic.th{width:100%;max-height:200px;object-fit:cover;margin:0 0 12px}.cap{display:block;color:var(--mute);font-size:.8em;text-align:center;margin-top:6px}
 .cm,.lkrow,#dl,.nv [data-g="submit"]{display:none!important}
 :root{--bg:#FCE4EC;--ink:#5C0F34;--mute:#8A4A66;--accent:#C2185B;--line:#E5A3BD;--card:#FEF1F6;
  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -127,12 +128,14 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <input class="fi" id="f-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
     <input class="fi" id="f-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" aria-label="বিভাগ" list="cat-list"><datalist id="cat-list"></datalist>
     <textarea class="fi" id="f-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
+    <input class="fi" id="f-i" placeholder="প্রচ্ছদ ছবির ফাইলের নাম (ঐচ্ছিক, যেমন cover1.jpg)" maxlength="80" aria-label="ছবির ফাইলের নাম" style="display:none">
+    <button class="tool" id="f-up" style="display:none;margin-right:8px">ছবি আপলোড করুন</button>
     <button class="tool" id="send">গল্প জমা দিন</button>
     <p id="msg" class="sub" role="status" style="margin-top:12px"></p>
     <div id="pending"></div>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ৬</footer>
+  <footer>© গল্পকথা · সংস্করণ ৭</footer>
 </div>
 
 <script>
@@ -156,7 +159,7 @@ function renderList(){
   const items=STORIES.filter(s=>(cat==="সব"||(cat===FAV?favs.includes(s.id):s.cat===cat))&&(!q||(s.title+s.intro+s.cat+s.body.join(" ")).includes(q)));
   sortItems(items);if(!items.length){$("#list").innerHTML=`<p class="empty">${cat===FAV&&!q?"এখনো কোনো পছন্দের গল্প নেই। গল্প পড়তে পড়তে ♡ চাপুন।":q?"কোনো গল্প মেলেনি। অন্য শব্দে খুঁজুন।":(STORIES.length?"এই বিভাগে এখনো কোনো গল্প নেই।":"এখনো কোনো গল্প যোগ করা হয়নি। শিগগিরই নতুন গল্প আসছে।")}</p>`;return}
   $("#list").innerHTML=items.map(s=>`<button class="row" data-id="${s.id}">
-    <h2>${favs.includes(s.id)?"♥ ":""}${s.title}</h2>
+    ${s.img?pic(s.img).replace('class="pic"','class="pic th"'):""}<h2>${favs.includes(s.id)?"♥ ":""}${s.title}</h2>
     <div class="meta"><span class="ic">${ic(s.cat)}</span><b>${s.cat}</b> &nbsp;|&nbsp; পড়তে ${s.min} মিনিট${LK[s.id]?` &nbsp;|&nbsp; ♥ ${bn(LK[s.id])}`:""}</div>
     <p>${s.intro}</p></button>`).join("");
 }
@@ -168,7 +171,7 @@ function show(id){
   try{if(!$("#cmname").value)$("#cmname").value=localStorage.getItem("cname")||""}catch(e){}
   $("#cmmsg").textContent="";paintLike();loadComments();
   $("#r-meta").textContent=s.cat+" | "+s.author+" | পড়তে "+s.min+" মিনিট";
-  $("#r-text").innerHTML=s.body.map(p=>`<p>${p}</p>`).join("");
+  $("#r-text").innerHTML=(s.img?`<p>${pic(s.img)}</p>`:"")+s.body.map(p=>`<p>${p}</p>`).join("");
   const rl=STORIES.filter(x=>x.cat===s.cat&&x.id!==s.id).slice(0,3);
   $("#rel").innerHTML=rl.length?`<h2>আরও পড়ুন</h2>`+rl.map(x=>`<button class="lk" data-id="${x.id}">${x.title}</button>`).join(""):"";
   $("#prev").style.visibility=i>0?"visible":"hidden";
@@ -188,6 +191,11 @@ async function loadComments(){const L=$("#cmlist");L.innerHTML="";const id=curId
   const l=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>a.at-b.at);
   L.innerHTML=l.length?l.map(c=>`<div class="au"><h3 style="font-size:17px">${esc(c.n)}</h3><p style="color:var(--ink)">${esc(c.t)}</p>${ow||(me&&c.u===me)?`<button class="tool" data-del="${esc(c.id)}">মুছুন</button>`:""}</div>`).join(""):`<p class="sub">এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্যটি আপনিই করুন।</p>`}catch(e){}}
 /* গল্প যোগ: রিপোজিটরির stories ফোল্ডারে .txt ফাইল রাখলেই সাইটে চলে আসে */
+function pic(n,c){
+  n=String(n||"").trim();if(!n)return"";
+  const ext=/^https?:\/\//i.test(n),f=encodeURIComponent(n).replace(/'/g,"%27");
+  return `<img class="pic" src="${esc(ext?n:f)}" alt="${esc(c||"")}" loading="lazy"${ext?"":` onerror="if(!this.dataset.f){this.dataset.f=1;this.src='images/${f}'}"`}>`+(c?`<span class="cap">${esc(c)}</span>`:"");
+}
 function parseStory(name,raw){
   const t=raw.replace(/\r/g,"").replace(/^\uFEFF/,""),m=t.match(/^([\s\S]*?)\n-{3,}[ \t]*\n([\s\S]*)$/);
   if(!m)return null;
@@ -195,7 +203,7 @@ function parseStory(name,raw){
   const title=h["শিরোনাম"],paras=m[2].split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
   if(!title||!paras.length)return null;
   const len=paras.join("").length;
-  return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),intro:esc(paras[0].slice(0,70))+"…",body:paras.map(p=>esc(p).replace(/\n/g,"<br>"))};
+  return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),img:h["ছবি"]||"",intro:esc((paras.find(p=>!/^\[ছবি:/.test(p))||"").slice(0,70))+"…",body:paras.map(p=>{const m=p.match(/^\[ছবি:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?))?\s*\]$/);return m?pic(m[1],m[2]):esc(p).replace(/\n/g,"<br>")})};
 }
 async function loadRepoStories(){
   try{
@@ -215,13 +223,13 @@ function ownerMode(){
   if(!h.endsWith(".github.io")||!r)return;
   const o=h.split(".")[0];
   document.querySelector(".s-pg .ph").textContent="নতুন গল্প যোগ করুন";
-  document.querySelector(".s-pg .sub").textContent="এটি সাইটের মালিকের জন্য। গল্প লিখে নিচের বোতাম চাপুন, GitHub-এর পাতা খুলবে, সেখানে শুধু Commit changes চাপুন।";
-  $("#send").textContent="GitHub-এ প্রকাশ করুন";
+  document.querySelector(".s-pg .sub").textContent="এটি সাইটের মালিকের জন্য। ছবি দিতে চাইলে আগে “ছবি আপলোড করুন” চেপে ছবি তুলুন, তারপর ছবির ফাইলের নাম লিখুন। গল্পের ভেতরে ছবি বসাতে আলাদা লাইনে লিখুন [ছবি: নাম.jpg]। শেষে “GitHub-এ প্রকাশ করুন” চেপে Commit changes চাপুন।";
+  $("#send").textContent="GitHub-এ প্রকাশ করুন";$("#f-i").style.display="block";$("#f-up").style.display="inline-block";$("#f-up").onclick=()=>window.open(`https://github.com/${o}/${r}/upload/main`,"_blank");
   $("#f-a").placeholder="লেখকের নাম";$("#f-a").setAttribute("aria-label","লেখকের নাম");
   $("#send").onclick=()=>{
     const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
     if(!t||!a||b.length<80){m.textContent="গল্পের নাম, লেখকের নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
-    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}\n---\n${b}`;
+    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}${$("#f-i").value.trim()?"\nছবি: "+$("#f-i").value.trim():""}\n---\n${b}`;
     const base=`https://github.com/${o}/${r}/new/main?filename=${encodeURIComponent("stories/story"+Date.now()+".txt")}`;
     const full=base+"&value="+encodeURIComponent(txt),fits=full.length<7000;
     try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}
