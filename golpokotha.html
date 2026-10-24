@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>গল্পকথা – বাংলা গল্পের ঘর</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FCE4EC;--ink:#5C0F34;--mute:#8A4A66;--accent:#C2185B;--line:#E5A3BD;--card:#FEF1F6;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2B0A1B;--ink:#FDE8F1;--mute:#D49BB5;--accent:#FF7FB0;--line:#6B2A4A;--card:#3A1026}}
+:root[data-theme="dark"]{--bg:#2B0A1B;--ink:#FDE8F1;--mute:#D49BB5;--accent:#FF7FB0;--line:#6B2A4A;--card:#3A1026}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;font-size:17px;line-height:1.7}
+.wrap{max-width:720px;margin:0 auto;padding:20px 20px 64px}
+.stitch{border:0;border-top:3px dashed var(--accent);margin:0;opacity:.85}
+header.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 0 16px}
+.brand{font-family:"Noto Serif Bengali",serif;font-weight:700;font-size:20px;cursor:pointer;background:none;border:0;color:var(--ink);padding:0}
+button{font:inherit;color:inherit;cursor:pointer}
+.tool{background:none;border:1px solid var(--line);border-radius:999px;padding:2px 14px;font-size:15px}
+.tool:hover,.tool:focus-visible{border-color:var(--accent);outline:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.hero{padding:44px 0 36px}
+.hero h1{font-family:"Noto Serif Bengali",serif;font-weight:800;font-size:clamp(46px,13vw,84px);line-height:1.15;margin:0 0 12px;letter-spacing:-.01em}
+.hero p{margin:0;color:var(--mute);font-size:19px;max-width:30em}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px}
+.chip{background:none;border:1px solid var(--line);border-radius:999px;padding:3px 16px;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.row{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:2px dashed var(--line);padding:22px 0;transition:padding-left .2s}
+.row:hover{padding-left:10px}
+.row h2{font-family:"Noto Serif Bengali",serif;font-size:26px;line-height:1.4;margin:0 0 4px}
+.row .meta{color:var(--mute);font-size:15px}
+.row .meta b{color:var(--accent);font-weight:600}
+.row p{margin:8px 0 0;color:var(--mute)}
+.search{width:100%;margin-top:30px;padding:10px 18px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit}
+.search+.filters{margin-top:14px}
+.empty{color:var(--mute);padding:28px 0}
+.prog{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:4px;width:0;background:var(--accent);z-index:20;display:none}
+.reading .prog{display:block}
+.pg{display:none}.v-authors .a-pg,.v-submit .s-pg{display:block}.v-authors .home,.v-submit .home{display:none}
+.ph{font-family:"Noto Serif Bengali",serif;font-weight:800;font-size:clamp(32px,8vw,48px);line-height:1.3;margin:36px 0 8px}
+.sub{color:var(--mute);margin:0 0 18px}
+.fi{display:block;width:100%;margin:0 0 12px;padding:10px 16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit}
+.au{border-bottom:2px dashed var(--line);padding:20px 0}.au h2,.au h3{font-family:"Noto Serif Bengali",serif;margin:0 0 4px}.au p{margin:0 0 10px;color:var(--mute)}
+.lk{background:none;border:1px solid var(--line);border-radius:999px;padding:2px 14px;margin:0 8px 8px 0}.lk:hover{border-color:var(--accent);color:var(--accent)}
+.nv{display:flex;gap:2px;flex-wrap:wrap}.nv button{background:none;border:0;padding:4px 10px;font-size:15px;border-radius:999px}.nv button:hover{color:var(--accent)}
+.ic{margin-right:6px}.rel{margin-top:40px}.rel h2{font-family:"Noto Serif Bengali",serif;font-size:22px;margin:0 0 10px}
+.lkrow{text-align:center;margin-top:28px}.cm{margin-top:36px}.cm h2{font-family:"Noto Serif Bengali",serif;font-size:22px;margin:0 0 6px}.cm .fi{margin-top:10px}
+.reader{display:none}
+.reading .reader{display:block}.reading .home{display:none}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0 28px;flex-wrap:wrap}
+.reader h1{font-family:"Noto Serif Bengali",serif;font-weight:800;font-size:clamp(34px,8vw,52px);line-height:1.3;margin:0 0 6px}
+.reader .meta{color:var(--mute);margin-bottom:22px}
+.text{font-family:"Noto Serif Bengali",serif;font-size:var(--fs,20px);line-height:2.05;margin-top:26px}
+.text p{margin:0 0 1.2em}
+.end{text-align:center;color:var(--accent);letter-spacing:.5em;margin-top:32px}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:36px;flex-wrap:wrap}
+footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
+@media (prefers-reduced-motion:reduce){.row{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="prog" id="prog"></div>
+  <header class="top">
+    <button class="brand" id="home-btn">গল্পকথা</button>
+    <nav class="nv"><button data-g="">গল্প</button><button data-g="authors">লেখক</button><button data-g="submit">গল্প পাঠান</button></nav>
+    <button class="tool" id="theme" aria-label="থিম বদলান">🌓 থিম</button>
+  </header>
+  <hr class="stitch">
+
+  <main class="home">
+    <section class="hero">
+      <h1>গল্পকথা</h1>
+      <p>ছোট ছোট বাংলা গল্প, এক বসায় পড়ে ফেলার মতো। চা হাতে নিয়ে বসুন।</p>
+      <button class="tool" id="rnd" style="margin-top:18px">এলোমেলো একটি গল্প পড়ুন</button>
+      <button class="tool" id="cont" style="margin-top:18px;display:none"></button>
+    </section>
+    <input class="search" id="q" type="search" placeholder="গল্প খুঁজুন…" aria-label="গল্প খুঁজুন">
+    <select class="search" id="sort" aria-label="সাজানোর ক্রম" style="margin-top:10px"><option value="new">নতুন আগে</option><option value="old">পুরোনো আগে</option><option value="pop">সবচেয়ে জনপ্রিয়</option><option value="short">ছোট গল্প আগে</option><option value="alpha">নামের ক্রমে (অ-আ)</option></select>
+    <div class="filters" id="filters" role="group" aria-label="বিভাগ"></div>
+    <div id="list"></div>
+  </main>
+
+  <article class="reader">
+    <div class="bar">
+      <button class="tool" id="back">সব গল্প</button>
+      <span>
+        <button class="tool" id="fav" aria-pressed="false">♡ পছন্দ</button>
+        <button class="tool" id="dl">⬇ সংরক্ষণ</button>
+        <button class="tool" id="smaller" aria-label="লেখা ছোট করুন">অ−</button>
+        <button class="tool" id="bigger" aria-label="লেখা বড় করুন">অ+</button>
+      </span>
+    </div>
+    <h1 id="r-title"></h1>
+    <div class="meta" id="r-meta"></div>
+    <hr class="stitch">
+    <div class="text" id="r-text"></div>
+    <div class="end">• • •</div>
+    <div class="lkrow"><button class="tool" id="like" aria-pressed="false">♡ ভালো লেগেছে · ০</button></div>
+    <section class="cm"><h2>মন্তব্য</h2><div id="cmlist"></div>
+      <input class="fi" id="cmname" maxlength="30" placeholder="আপনার নাম" aria-label="আপনার নাম">
+      <textarea class="fi" id="cmtext" rows="3" maxlength="500" placeholder="আপনার মন্তব্য লিখুন…" aria-label="মন্তব্য"></textarea>
+      <button class="tool" id="cmsend">মন্তব্য করুন</button>
+      <p id="cmmsg" class="sub" role="status" style="margin-top:10px"></p></section>
+    <div class="rel" id="rel"></div>
+    <div class="nav">
+      <button class="tool" id="prev">আগের গল্প</button>
+      <button class="tool" id="next">পরের গল্প</button>
+    </div>
+  </article>
+
+  <section class="pg a-pg">
+    <h1 class="ph">আমাদের লেখক</h1>
+    <p class="sub">নাম ধরে লেখকের সব গল্প দেখুন।</p>
+    <div id="authors"></div>
+  </section>
+
+  <section class="pg s-pg">
+    <h1 class="ph">আপনার গল্প পাঠান</h1>
+    <p class="sub">যাচাইয়ের পর গল্প সাইটে প্রকাশ করা হবে। শুধু নিজের লেখা গল্প পাঠান।</p>
+    <input class="fi" id="f-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
+    <input class="fi" id="f-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
+    <select class="fi" id="f-c" aria-label="বিভাগ"></select>
+    <textarea class="fi" id="f-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
+    <button class="tool" id="send">গল্প জমা দিন</button>
+    <p id="msg" class="sub" role="status" style="margin-top:12px"></p>
+    <div id="pending"></div>
+  </section>
+
+  <footer>© গল্পকথা – এখানে সব গল্প নমুনা হিসেবে লেখা। নিজের গল্প বসিয়ে নিন।</footer>
+</div>
+
+<script>
+/* নিজের গল্প যোগ করতে এই তালিকায় নতুন একটি অবজেক্ট বসান */
+const STORIES=[
+ {id:"s1",title:"বৃষ্টির বিকেল",cat:"জীবনের গল্প",author:"সুমাইয়া নূর",min:2,
+  intro:"আকাশ থেকে আসা চিঠি পড়তে শিখেছে রিনা।",
+  body:["জানালার ধারে বসে রিনা দেখছিল, উঠোনে জল জমছে। ঠিক এমন এক বিকেলেই বাবা বলেছিলেন, “বৃষ্টি মানে আকাশের চিঠি।” তখন সে চিঠি পড়তে শেখেনি। আজ শিখেছে।","প্রতিটি ফোঁটায় লেখা আছে একটা করে স্মৃতি—বাবার কালো ছাতা, মায়ের গরম খিচুড়ি, আর ভিজে যাওয়া স্কুলব্যাগ।","চা ঠান্ডা হয়ে গেল। রিনা হাসল। কিছু চিঠির উত্তর দিতে হয় না, শুধু ভিজতে হয়।"]},
+ {id:"s2",title:"পুকুরপাড়ের রাত",cat:"ভূতের গল্প",author:"তানভীর হাসান",min:2,
+  intro:"অমাবস্যার রাতে তেঁতুল গাছের তলায় কে হাঁটে?",
+  body:["আমাদের গ্রামে একটা পুকুর ছিল, তার পাড়ে বুড়ো তেঁতুল গাছ। দাদু বলতেন, অমাবস্যার রাতে ওখানে কেউ একজন হাঁটে। আমি বিশ্বাস করতাম না।","সেই রাতে টর্চ হাতে গেলাম। গাছের তলায় পৌঁছতেই পেছনে পায়ের শব্দ—টুপ, টুপ, টুপ। ঘুরে দেখি, কেউ নেই। শুধু গাছ থেকে পাকা তেঁতুল ঝরছে।","হেসে ফেলতে যাব, ঠিক তখনই কে যেন কানের কাছে ফিসফিস করে বলল, “এবার আমার তেঁতুলের দাম দে।”"]},
+ {id:"s3",title:"ছোট্ট মাঝি",cat:"শিশুদের গল্প",author:"সুমাইয়া নূর",min:1,
+  intro:"কাগজের নৌকা ভেসে গেল সাগরের দিকে।",
+  body:["নদীর ধারে থাকত টুনু। তার ছিল একটা কাগজের নৌকা। একদিন ঢেউয়ের টানে নৌকাটা ভেসে গেল দূরে। টুনু কাঁদল না, হাত নেড়ে বলল, “যা, সাগর দেখে আয়।”","অনেক দিন পর এক জেলে এসে বলল, “তোর নৌকার কথা সাগরের মাছেরা বলাবলি করে।” টুনু হাসল। কারণ ছোট ছোট স্বপ্নও অনেক দূর যায়।"]}
+];
+const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
+let cat="সব", fs=20, q="", favs=[], curId="";
+try{favs=JSON.parse(localStorage.getItem("fav")||"[]")}catch(e){}
+if(!Array.isArray(favs))favs=[];
+const FAV="♥ পছন্দের";
+const ICON={"জীবনের গল্প":"🌧️","ভূতের গল্প":"👻","শিশুদের গল্প":"🚣","রহস্য":"🔍","প্রেমের গল্প":"💌","রোমান্টিক গল্প":"🌹","পারিবারিক গল্প":"🏡","সামাজিক গল্প":"🤝","গোয়েন্দা গল্প":"🕵️","রোমাঞ্চ ও থ্রিলার":"⚡","হাসির গল্প":"😄","কিশোর গল্প":"🎒","ফ্যান্টাসি ও রূপকথা":"🧚","বিজ্ঞান কল্পকাহিনি":"🚀","ঐতিহাসিক গল্প":"🏛️","মুক্তিযুদ্ধের গল্প":"🇧🇩","ভ্রমণের গল্প":"🧭","অনুপ্রেরণামূলক গল্প":"🌟","নীতিকথা":"📜"},ic=c=>ICON[c]||"📖";
+const BASE=STORIES.length,cats=[],CATS=["জীবনের গল্প","প্রেমের গল্প","রোমান্টিক গল্প","পারিবারিক গল্প","সামাজিক গল্প","ভূতের গল্প","রহস্য","গোয়েন্দা গল্প","রোমাঞ্চ ও থ্রিলার","হাসির গল্প","শিশুদের গল্প","কিশোর গল্প","ফ্যান্টাসি ও রূপকথা","বিজ্ঞান কল্পকাহিনি","ঐতিহাসিক গল্প","মুক্তিযুদ্ধের গল্প","ভ্রমণের গল্প","অনুপ্রেরণামূলক গল্প","নীতিকথা","অন্যান্য"],BIO={"সুমাইয়া নূর":"নদী আর বর্ষার গল্প লিখতে ভালোবাসেন। (নমুনা পরিচিতি)","তানভীর হাসান":"গ্রামবাংলার ভূতের গল্পের কারিগর। (নমুনা পরিচিতি)"};
+const setCats=()=>{cats.length=0;cats.push("সব",FAV,...new Set([...CATS,...STORIES.map(s=>s.cat)]))};setCats();
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const getDb=()=>window.claude?claude.use("db"):Promise.resolve(null);
+
+function renderFilters(){
+  $("#filters").innerHTML=cats.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${c===cat}">${c}</button>`).join("");
+}
+function renderList(){
+  const items=STORIES.filter(s=>(cat==="সব"||(cat===FAV?favs.includes(s.id):s.cat===cat))&&(!q||(s.title+s.intro+s.cat+s.body.join(" ")).includes(q)));
+  sortItems(items);if(!items.length){$("#list").innerHTML=`<p class="empty">${cat===FAV&&!q?"এখনো কোনো পছন্দের গল্প নেই। গল্প পড়তে পড়তে ♡ চাপুন।":q?"কোনো গল্প মেলেনি। অন্য শব্দে খুঁজুন।":"এই বিভাগে এখনো কোনো গল্প নেই।"}</p>`;return}
+  $("#list").innerHTML=items.map(s=>`<button class="row" data-id="${s.id}">
+    <h2>${favs.includes(s.id)?"♥ ":""}${s.title}</h2>
+    <div class="meta"><span class="ic">${ic(s.cat)}</span><b>${s.cat}</b> &nbsp;|&nbsp; পড়তে ${s.min} মিনিট${LK[s.id]?` &nbsp;|&nbsp; ♥ ${bn(LK[s.id])}`:""}</div>
+    <p>${s.intro}</p></button>`).join("");
+}
+function show(id){
+  const i=STORIES.findIndex(s=>s.id===id);
+  app.classList.remove("reading","v-authors","v-submit");showCont();if(id==="authors"||id==="submit"){app.classList.add("v-"+id);if(id==="submit")renderPending();window.scrollTo(0,0);return}if(i<0)return;
+  const s=STORIES[i];
+  $("#r-title").textContent=s.title;curId=s.id;paintFav();try{localStorage.setItem("last",s.id)}catch(e){}
+  try{if(!$("#cmname").value)$("#cmname").value=localStorage.getItem("cname")||""}catch(e){}
+  $("#cmmsg").textContent="";paintLike();loadComments();
+  $("#r-meta").textContent=s.cat+" | "+s.author+" | পড়তে "+s.min+" মিনিট";
+  $("#r-text").innerHTML=s.body.map(p=>`<p>${p}</p>`).join("");
+  const rl=STORIES.filter(x=>x.cat===s.cat&&x.id!==s.id).slice(0,3);
+  $("#rel").innerHTML=rl.length?`<h2>আরও পড়ুন</h2>`+rl.map(x=>`<button class="lk" data-id="${x.id}">${x.title}</button>`).join(""):"";
+  $("#prev").style.visibility=i>0?"visible":"hidden";
+  $("#next").style.visibility=i<STORIES.length-1?"visible":"hidden";
+  $("#prev").dataset.id=(STORIES[i-1]||{}).id;
+  $("#next").dataset.id=(STORIES[i+1]||{}).id;
+  app.classList.add("reading");
+  window.scrollTo(0,0);upd();
+}
+let srt="new";const LK={},MY=new Set(),bn=x=>x.toLocaleString("bn-BD");
+function sortItems(a){if(srt==="new")a.reverse();else if(srt==="pop")a.sort((x,y)=>(LK[y.id]||0)-(LK[x.id]||0));else if(srt==="short")a.sort((x,y)=>x.min-y.min);else if(srt==="alpha")a.sort((x,y)=>x.title.localeCompare(y.title,"bn"))}
+async function uid(){try{const u=await claude.use("user");return u?String(await u.id()):null}catch(e){return null}}
+async function loadLikes(){const db=await getDb();if(!db)return;try{const sn=await db.collection("likes").get(),me=await uid();Object.keys(LK).forEach(k=>delete LK[k]);MY.clear();sn.docs.forEach(d=>{const x=d.data();LK[x.s]=(LK[x.s]||0)+1;if(me&&x.u===me)MY.add(x.s)});renderList();paintLike()}catch(e){}}
+function paintLike(){const b=$("#like"),on=MY.has(curId);b.textContent=(on?"♥":"♡")+" ভালো লেগেছে · "+bn(LK[curId]||0);b.setAttribute("aria-pressed",on)}
+async function loadComments(){const L=$("#cmlist");L.innerHTML="";const id=curId,db=await getDb();if(!db){L.innerHTML=`<p class="sub">মন্তব্য দেখতে সাইন ইন করুন।</p>`;return}
+  try{const sn=await db.collection("comments").where("s","==",id).get();if(id!==curId)return;const me=await uid();let ow=false;try{const u=await claude.use("user");ow=!!(u&&u.isOwner())}catch(e){}
+  const l=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>a.at-b.at);
+  L.innerHTML=l.length?l.map(c=>`<div class="au"><h3 style="font-size:17px">${esc(c.n)}</h3><p style="color:var(--ink)">${esc(c.t)}</p>${ow||(me&&c.u===me)?`<button class="tool" data-del="${esc(c.id)}">মুছুন</button>`:""}</div>`).join(""):`<p class="sub">এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্যটি আপনিই করুন।</p>`}catch(e){}}
+function showCont(){let id="";try{id=localStorage.getItem("last")||""}catch(e){}const s=STORIES.find(x=>x.id===id),b=$("#cont");b.style.display=s?"inline-block":"none";if(s){b.textContent="▶ চালিয়ে পড়ুন";b.onclick=()=>go(s.id)}}
+function paintFav(){const on=favs.includes(curId),b=$("#fav");b.textContent=on?"♥ পছন্দের":"♡ পছন্দ";b.setAttribute("aria-pressed",on)}
+function upd(){const h=document.documentElement.scrollHeight-innerHeight;$("#prog").style.width=(h>0?Math.min(100,scrollY/h*100):0)+"%"}
+function go(id){ try{location.hash=id||""}catch(e){} show(id); }
+
+$("#filters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList()});
+$("#list").addEventListener("click",e=>{const b=e.target.closest(".row");if(b)go(b.dataset.id)});
+$("#back").onclick=$("#home-btn").onclick=()=>go("");
+$("#prev").onclick=e=>go(e.currentTarget.dataset.id);
+$("#next").onclick=e=>go(e.currentTarget.dataset.id);
+const setFs=d=>{fs=Math.min(30,Math.max(16,fs+d));$("#r-text").style.setProperty("--fs",fs+"px")};
+$("#bigger").onclick=()=>setFs(2);$("#smaller").onclick=()=>setFs(-2);
+try{const t=localStorage.getItem("theme");if(t)root.dataset.theme=t}catch(e){}
+$("#theme").onclick=()=>{
+  const dark=root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  root.dataset.theme=dark?"light":"dark";try{localStorage.setItem("theme",root.dataset.theme)}catch(e){}
+};
+$("#q").addEventListener("input",e=>{q=e.target.value.trim();renderList()});
+$("#fav").onclick=()=>{const i=favs.indexOf(curId);i>=0?favs.splice(i,1):favs.push(curId);try{localStorage.setItem("fav",JSON.stringify(favs))}catch(e){}paintFav();renderList()};
+function renderAuthors(){const m=new Map();STORIES.forEach(s=>{m.has(s.author)||m.set(s.author,[]);m.get(s.author).push(s)});
+  $("#authors").innerHTML=[...m].map(([n,l])=>`<div class="au"><h2>${n}</h2><p>${Object.hasOwn(BIO,n)?BIO[n]:"গল্পকথার লেখক।"} ${l.length}টি গল্প।</p>${l.map(s=>`<button class="lk" data-id="${s.id}">${s.title}</button>`).join("")}</div>`).join("")}
+async function loadPub(){const db=await getDb();if(!db)return;try{const sn=await db.collection("published").get();STORIES.length=BASE;
+  sn.docs.forEach(d=>{const x=d.data(),t=String(x.text||"");STORIES.push({id:"u"+d.id.replace(/\W/g,""),title:esc(x.title),cat:CATS.includes(x.cat)?x.cat:"অন্যান্য",author:esc(x.author),min:Math.max(1,Math.round(t.length/900)),intro:esc(t.slice(0,70))+"…",body:t.split(/\n+/).map(esc)})});
+  setCats();renderFilters();renderList();renderAuthors();show(location.hash.slice(1))}catch(e){}}
+async function renderPending(){const el=$("#pending");el.innerHTML="";const u=window.claude&&await claude.use("user");if(!(u&&u.isOwner()))return;const db=await getDb();if(!db)return;
+  try{const l=(await db.collection("submissions").get()).docs.filter(d=>d.data().status==="pending");
+  el.innerHTML=`<h2 class="ph" style="font-size:26px">অপেক্ষমাণ গল্প (${l.length})</h2>`+l.map(d=>{const x=d.data();return `<div class="au"><h3>${esc(x.title)}</h3><p>${esc(x.author)} | ${esc(x.cat)}</p><p>${esc(String(x.text).slice(0,200))}…</p><button class="tool" data-ok="${d.id}">প্রকাশ করুন</button> <button class="tool" data-no="${d.id}">বাদ দিন</button></div>`}).join("");
+  el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const id=b.dataset.ok||b.dataset.no,d=l.find(z=>z.id===id);if(!d)return;b.disabled=true;
+   try{if(b.dataset.ok)await db.collection("published").add({...d.data(),status:"approved"});await db.doc("submissions/"+id).update({status:b.dataset.ok?"approved":"rejected"});renderPending();loadPub()}catch(er){b.disabled=false}}}catch(e){}}
+$(".nv").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.g)};
+$("#authors").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
+$("#rel").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
+$("#sort").onchange=e=>{srt=e.target.value;renderList()};
+$("#like").onclick=async()=>{const m=$("#cmmsg"),db=await getDb(),me=await uid();if(!db||!me){m.textContent="ভালো লাগা জানাতে সাইন ইন করতে হবে।";return}
+  const id=curId,ref=db.doc("likes/"+id+"_"+me.replace(/\W/g,"")),on=MY.has(id);
+  try{if(on){await ref.delete();MY.delete(id);LK[id]=Math.max(0,(LK[id]||1)-1)}else{await ref.set({s:id,u:me});MY.add(id);LK[id]=(LK[id]||0)+1}paintLike();renderList()}catch(e){m.textContent="এখন ভালো লাগা জানানো যাচ্ছে না।"}};
+$("#cmsend").onclick=async()=>{const m=$("#cmmsg"),n=$("#cmname").value.trim(),t=$("#cmtext").value.trim();if(!n||t.length<2){m.textContent="নাম ও মন্তব্য লিখুন।";return}
+  const db=await getDb(),me=await uid();if(!db||!me){m.textContent="মন্তব্য করতে সাইন ইন করতে হবে।";return}
+  try{await db.collection("comments").add({s:curId,u:me,n:n.slice(0,30),t:t.slice(0,500),at:Date.now()});try{localStorage.setItem("cname",n)}catch(e){}$("#cmtext").value="";m.textContent="";loadComments()}catch(e){m.textContent="মন্তব্য জমা হয়নি। অনুমতি না থাকলে সাইটের মালিকের সঙ্গে যোগাযোগ করুন।"}};
+$("#cmlist").onclick=async e=>{const b=e.target.closest("[data-del]");if(!b)return;const db=await getDb();if(!db)return;try{await db.doc("comments/"+b.dataset.del).delete();loadComments()}catch(er){}};
+$("#dl").onclick=async()=>{const s=STORIES.find(x=>x.id===curId);if(!s)return;try{const d=await claude.use("downloads");if(d)await d.save({filename:s.title+".txt",data:s.title+"\n"+s.author+"\n\n"+s.body.join("\n\n")})}catch(e){}};
+$("#rnd").onclick=()=>go(STORIES[Math.floor(Math.random()*STORIES.length)].id);
+$("#send").onclick=async()=>{const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
+  if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
+  const db=await getDb();if(!db){m.textContent="এখন গল্প জমা নেওয়া যাচ্ছে না। সাইন ইন করে আবার চেষ্টা করুন।";return}
+  try{await db.collection("submissions").add({title:t.slice(0,80),author:a.slice(0,40),cat:$("#f-c").value,text:b.slice(0,8000),status:"pending",at:Date.now()});
+   m.textContent="ধন্যবাদ! গল্পটি জমা হয়েছে। যাচাইয়ের পর প্রকাশ করা হবে।";["f-t","f-a","f-b"].forEach(i=>$("#"+i).value="")}
+  catch(e){m.textContent="গল্প জমা হয়নি। জমা দেওয়ার অনুমতি না থাকলে সাইটের মালিকের সঙ্গে যোগাযোগ করুন।"}};
+window.addEventListener("scroll",upd,{passive:true});
+window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
+renderFilters();renderList();renderAuthors();$("#f-c").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("");show(location.hash.slice(1));loadPub();loadLikes();
+</script>
+</body>
+</html>
