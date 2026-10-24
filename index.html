@@ -132,29 +132,19 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <div id="pending"></div>
   </section>
 
-  <footer>© গল্পকথা</footer>
+  <footer>© গল্পকথা · সংস্করণ ৬</footer>
 </div>
 
 <script>
 /* নিজের গল্প যোগ করতে এই তালিকায় নতুন একটি অবজেক্ট বসান */
-const STORIES=[
- {id:"s1",title:"বৃষ্টির বিকেল",cat:"জীবনের গল্প",author:"সুমাইয়া নূর",min:2,
-  intro:"আকাশ থেকে আসা চিঠি পড়তে শিখেছে রিনা।",
-  body:["জানালার ধারে বসে রিনা দেখছিল, উঠোনে জল জমছে। ঠিক এমন এক বিকেলেই বাবা বলেছিলেন, “বৃষ্টি মানে আকাশের চিঠি।” তখন সে চিঠি পড়তে শেখেনি। আজ শিখেছে।","প্রতিটি ফোঁটায় লেখা আছে একটা করে স্মৃতি—বাবার কালো ছাতা, মায়ের গরম খিচুড়ি, আর ভিজে যাওয়া স্কুলব্যাগ।","চা ঠান্ডা হয়ে গেল। রিনা হাসল। কিছু চিঠির উত্তর দিতে হয় না, শুধু ভিজতে হয়।"]},
- {id:"s2",title:"পুকুরপাড়ের রাত",cat:"ভূতের গল্প",author:"তানভীর হাসান",min:2,
-  intro:"অমাবস্যার রাতে তেঁতুল গাছের তলায় কে হাঁটে?",
-  body:["আমাদের গ্রামে একটা পুকুর ছিল, তার পাড়ে বুড়ো তেঁতুল গাছ। দাদু বলতেন, অমাবস্যার রাতে ওখানে কেউ একজন হাঁটে। আমি বিশ্বাস করতাম না।","সেই রাতে টর্চ হাতে গেলাম। গাছের তলায় পৌঁছতেই পেছনে পায়ের শব্দ—টুপ, টুপ, টুপ। ঘুরে দেখি, কেউ নেই। শুধু গাছ থেকে পাকা তেঁতুল ঝরছে।","হেসে ফেলতে যাব, ঠিক তখনই কে যেন কানের কাছে ফিসফিস করে বলল, “এবার আমার তেঁতুলের দাম দে।”"]},
- {id:"s3",title:"ছোট্ট মাঝি",cat:"শিশুদের গল্প",author:"সুমাইয়া নূর",min:1,
-  intro:"কাগজের নৌকা ভেসে গেল সাগরের দিকে।",
-  body:["নদীর ধারে থাকত টুনু। তার ছিল একটা কাগজের নৌকা। একদিন ঢেউয়ের টানে নৌকাটা ভেসে গেল দূরে। টুনু কাঁদল না, হাত নেড়ে বলল, “যা, সাগর দেখে আয়।”","অনেক দিন পর এক জেলে এসে বলল, “তোর নৌকার কথা সাগরের মাছেরা বলাবলি করে।” টুনু হাসল। কারণ ছোট ছোট স্বপ্নও অনেক দূর যায়।"]}
-];
+const STORIES=[];
 const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
 let cat="সব", fs=20, q="", favs=[], curId="";
 try{favs=JSON.parse(localStorage.getItem("fav")||"[]")}catch(e){}
 if(!Array.isArray(favs))favs=[];
 const FAV="♥ পছন্দের";
 const ICON={"জীবনের গল্প":"🌧️","ভূতের গল্প":"👻","শিশুদের গল্প":"🚣","রহস্য":"🔍","প্রেমের গল্প":"💌","রোমান্টিক গল্প":"🌹","পারিবারিক গল্প":"🏡","সামাজিক গল্প":"🤝","গোয়েন্দা গল্প":"🕵️","রোমাঞ্চ ও থ্রিলার":"⚡","হাসির গল্প":"😄","কিশোর গল্প":"🎒","ফ্যান্টাসি ও রূপকথা":"🧚","বিজ্ঞান কল্পকাহিনি":"🚀","ঐতিহাসিক গল্প":"🏛️","মুক্তিযুদ্ধের গল্প":"🇧🇩","ভ্রমণের গল্প":"🧭","অনুপ্রেরণামূলক গল্প":"🌟","নীতিকথা":"📜"},ic=c=>ICON[c]||"📖";
-const BASE=STORIES.length,cats=[],CATS=[],BIO={"সুমাইয়া নূর":"নদী আর বর্ষার গল্প লিখতে ভালোবাসেন। (নমুনা পরিচিতি)","তানভীর হাসান":"গ্রামবাংলার ভূতের গল্পের কারিগর। (নমুনা পরিচিতি)"};
+const BASE=STORIES.length,cats=[],CATS=[],BIO={};
 const setCats=()=>{cats.length=0;cats.push("সব",FAV,...new Set([...CATS,...STORIES.map(s=>s.cat)]));{const dl=document.getElementById("cat-list");if(dl)dl.innerHTML=[...new Set(STORIES.map(s=>s.cat))].map(c=>`<option value="${c}">`).join("")}};setCats();
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const getDb=()=>window.claude?claude.use("db"):Promise.resolve(null);
@@ -164,7 +154,7 @@ function renderFilters(){
 }
 function renderList(){
   const items=STORIES.filter(s=>(cat==="সব"||(cat===FAV?favs.includes(s.id):s.cat===cat))&&(!q||(s.title+s.intro+s.cat+s.body.join(" ")).includes(q)));
-  sortItems(items);if(!items.length){$("#list").innerHTML=`<p class="empty">${cat===FAV&&!q?"এখনো কোনো পছন্দের গল্প নেই। গল্প পড়তে পড়তে ♡ চাপুন।":q?"কোনো গল্প মেলেনি। অন্য শব্দে খুঁজুন।":"এই বিভাগে এখনো কোনো গল্প নেই।"}</p>`;return}
+  sortItems(items);if(!items.length){$("#list").innerHTML=`<p class="empty">${cat===FAV&&!q?"এখনো কোনো পছন্দের গল্প নেই। গল্প পড়তে পড়তে ♡ চাপুন।":q?"কোনো গল্প মেলেনি। অন্য শব্দে খুঁজুন।":(STORIES.length?"এই বিভাগে এখনো কোনো গল্প নেই।":"এখনো কোনো গল্প যোগ করা হয়নি। শিগগিরই নতুন গল্প আসছে।")}</p>`;return}
   $("#list").innerHTML=items.map(s=>`<button class="row" data-id="${s.id}">
     <h2>${favs.includes(s.id)?"♥ ":""}${s.title}</h2>
     <div class="meta"><span class="ic">${ic(s.cat)}</span><b>${s.cat}</b> &nbsp;|&nbsp; পড়তে ${s.min} মিনিট${LK[s.id]?` &nbsp;|&nbsp; ♥ ${bn(LK[s.id])}`:""}</div>
@@ -280,7 +270,7 @@ $("#cmsend").onclick=async()=>{const m=$("#cmmsg"),n=$("#cmname").value.trim(),t
   try{await db.collection("comments").add({s:curId,u:me,n:n.slice(0,30),t:t.slice(0,500),at:Date.now()});try{localStorage.setItem("cname",n)}catch(e){}$("#cmtext").value="";m.textContent="";loadComments()}catch(e){m.textContent="মন্তব্য জমা হয়নি। অনুমতি না থাকলে সাইটের মালিকের সঙ্গে যোগাযোগ করুন।"}};
 $("#cmlist").onclick=async e=>{const b=e.target.closest("[data-del]");if(!b)return;const db=await getDb();if(!db)return;try{await db.doc("comments/"+b.dataset.del).delete();loadComments()}catch(er){}};
 $("#dl").onclick=async()=>{const s=STORIES.find(x=>x.id===curId);if(!s)return;try{const d=await claude.use("downloads");if(d)await d.save({filename:s.title+".txt",data:s.title+"\n"+s.author+"\n\n"+s.body.join("\n\n")})}catch(e){}};
-$("#rnd").onclick=()=>go(STORIES[Math.floor(Math.random()*STORIES.length)].id);
+$("#rnd").onclick=()=>{if(STORIES.length)go(STORIES[Math.floor(Math.random()*STORIES.length)].id)};
 $("#send").onclick=async()=>{const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
   if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
   const db=await getDb();if(!db){m.textContent="এখন গল্প জমা নেওয়া যাচ্ছে না। সাইন ইন করে আবার চেষ্টা করুন।";return}
