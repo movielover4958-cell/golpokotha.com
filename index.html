@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.mt{background:none;border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:14px;color:var(--accent)}.mt:hover{border-color:var(--accent)}.tgbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0;color:var(--mute)}.tgbar:empty{display:none}
 .mbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 8px;margin:12px 0}
 .mbar button{background:none;border:0;padding:8px 10px;font-size:16px;border-radius:10px;white-space:nowrap}.mbar button:hover{color:var(--accent)}
 .cdrop{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
@@ -96,6 +97,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
   <div class="drawer" id="drawer" hidden>
     <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="send">✉️ গল্প লিখে পাঠান</button><button data-g="submit">গল্প পাঠান</button></nav>
     <div class="dsec">বিভাগ</div><div class="dcats" id="dcats"></div>
+    <div class="dsec">ট্যাগ</div><div class="dcats" id="dtags"></div>
     <div class="dsec">আরও</div>
     <div class="dact"><button class="tool" id="dfav">♥ পছন্দের গল্প</button><button class="tool" id="drnd">🎲 এলোমেলো গল্প</button></div>
   </div>
@@ -111,6 +113,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <input class="search" id="q" type="search" placeholder="গল্প খুঁজুন…" aria-label="গল্প খুঁজুন">
     <select class="search" id="sort" aria-label="সাজানোর ক্রম" style="margin-top:10px"><option value="new">নতুন আগে</option><option value="old">পুরোনো আগে</option><option value="pop">সবচেয়ে জনপ্রিয়</option><option value="short">ছোট গল্প আগে</option><option value="alpha">নামের ক্রমে (অ-আ)</option></select>
     <div class="filters" id="filters" role="group" aria-label="বিভাগ"></div>
+    <div class="tgbar" id="tgbar"></div>
     <div id="list"></div>
   </main>
 
@@ -126,6 +129,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     </div>
     <h1 id="r-title"></h1>
     <div class="meta" id="r-meta"></div>
+    <div class="tags" id="r-tags"></div>
     <hr class="stitch">
     <div class="text" id="r-text"></div>
     <div class="end">• • •</div>
@@ -154,6 +158,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <input class="fi" id="f-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
     <input class="fi" id="f-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
     <input class="fi" id="f-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" aria-label="বিভাগ" list="cat-list"><datalist id="cat-list"></datalist>
+    <input class="fi" id="f-g" placeholder="ট্যাগ (কমা দিয়ে আলাদা করুন, ঐচ্ছিক)" maxlength="100" aria-label="ট্যাগ">
     <textarea class="fi" id="f-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
     <input class="fi" id="f-i" placeholder="প্রচ্ছদ ছবির ফাইলের নাম (ঐচ্ছিক, যেমন cover1.jpg)" maxlength="80" aria-label="ছবির ফাইলের নাম" style="display:none">
     <button class="tool" id="f-up" style="display:none;margin-right:8px">ছবি আপলোড করুন</button>
@@ -168,6 +173,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <input class="fi" id="w-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
     <input class="fi" id="w-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
     <input class="fi" id="w-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" list="cat-list" aria-label="বিভাগ">
+    <input class="fi" id="w-g" placeholder="ট্যাগ (ঐচ্ছিক, কমা দিয়ে আলাদা করুন)" maxlength="100" aria-label="ট্যাগ">
     <textarea class="fi" id="w-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
     <input class="fi" id="w-e" type="email" placeholder="আপনার ইমেইল (ঐচ্ছিক, যোগাযোগের জন্য)" maxlength="80" aria-label="আপনার ইমেইল">
     <button class="tool solid" id="w-send">গল্প জমা দিন</button>
@@ -176,7 +182,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <p id="w-msg" class="sub" role="status" style="margin-top:12px"></p>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ১১</footer>
+  <footer>© গল্পকথা · সংস্করণ ১২</footer>
 </div>
 
 <script>
@@ -185,7 +191,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
 const CONTACT_EMAIL="",CONTACT_WA="",WEB3_KEY="";
 const STORIES=[];
 const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
-let cat="সব", fs=20, q="", favs=[], curId="";
+let cat="সব", tg="", fs=20, q="", favs=[], curId="";
 try{favs=JSON.parse(localStorage.getItem("fav")||"[]")}catch(e){}
 if(!Array.isArray(favs))favs=[];
 const FAV="♥ পছন্দের";
@@ -199,11 +205,12 @@ function renderFilters(){
   $("#filters").innerHTML=cats.map(c=>`<button class="chip" data-c="${c}" aria-pressed="${c===cat}">${c}</button>`).join("");
 }
 function renderList(){
-  const items=STORIES.filter(s=>(cat==="সব"||(cat===FAV?favs.includes(s.id):s.cat===cat))&&(!q||(s.title+s.intro+s.cat+s.body.join(" ")).includes(q)));
+  const items=STORIES.filter(s=>(cat==="সব"||(cat===FAV?favs.includes(s.id):s.cat===cat))&&(!tg||(s.tags||[]).includes(tg))&&(!q||(s.title+s.intro+s.cat+(s.tags||[]).join(" ")+s.body.join(" ")).includes(q)));
+  $("#tgbar").innerHTML=tg?`🏷️ ট্যাগ: <b>${tg}</b> <button class="tool">✕ সরান</button>`:"";
   sortItems(items);if(!items.length){$("#list").innerHTML=`<p class="empty">${cat===FAV&&!q?"এখনো কোনো পছন্দের গল্প নেই। গল্প পড়তে পড়তে ♡ চাপুন।":q?"কোনো গল্প মেলেনি। অন্য শব্দে খুঁজুন।":(STORIES.length?"এই বিভাগে এখনো কোনো গল্প নেই।":"এখনো কোনো গল্প যোগ করা হয়নি। শিগগিরই নতুন গল্প আসছে।")}</p>`;return}
   $("#list").innerHTML=items.map(s=>`<button class="row" data-id="${s.id}">
     ${s.img?pic(s.img).replace('class="pic"','class="pic th"'):""}<h2>${favs.includes(s.id)?"♥ ":""}${s.title}</h2>
-    <div class="meta"><span class="ic">${ic(s.cat)}</span><b>${s.cat}</b> &nbsp;|&nbsp; পড়তে ${s.min} মিনিট${LK[s.id]?` &nbsp;|&nbsp; ♥ ${bn(LK[s.id])}`:""}</div>
+    <div class="meta"><span class="ic">${ic(s.cat)}</span><b>${s.cat}</b> &nbsp;|&nbsp; পড়তে ${s.min} মিনিট${(s.tags||[]).length?` &nbsp;|&nbsp; 🏷️ ${s.tags.join(", ")}`:""}${LK[s.id]?` &nbsp;|&nbsp; ♥ ${bn(LK[s.id])}`:""}</div>
     <p>${s.intro}</p></button>`).join("");
 }
 function show(id){
@@ -214,6 +221,7 @@ function show(id){
   try{if(!$("#cmname").value)$("#cmname").value=localStorage.getItem("cname")||""}catch(e){}
   $("#cmmsg").textContent="";paintLike();loadComments();
   $("#r-meta").textContent=s.cat+" | "+s.author+" | পড়তে "+s.min+" মিনিট";
+  $("#r-tags").innerHTML=`<button class="mt" data-k="c" data-v="${s.cat}">📁 ${s.cat}</button>`+(s.tags||[]).map(t=>`<button class="mt" data-k="t" data-v="${t}">🏷️ ${t}</button>`).join("");
   $("#r-text").innerHTML=(s.img?`<p>${pic(s.img)}</p>`:"")+s.body.map(p=>`<p>${p}</p>`).join("");
   const rl=STORIES.filter(x=>x.cat===s.cat&&x.id!==s.id).slice(0,3);
   $("#rel").innerHTML=rl.length?`<h2>আরও পড়ুন</h2>`+rl.map(x=>`<button class="lk" data-id="${x.id}">${x.title}</button>`).join(""):"";
@@ -246,7 +254,7 @@ function parseStory(name,raw){
   const title=h["শিরোনাম"],paras=m[2].split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
   if(!title||!paras.length)return null;
   const len=paras.join("").length;
-  return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),img:h["ছবি"]||"",intro:esc((paras.find(p=>!/^\[ছবি:/.test(p))||"").slice(0,70))+"…",body:paras.map(p=>{const m=p.match(/^\[ছবি:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?))?\s*\]$/);return m?pic(m[1],m[2]):esc(p).replace(/\n/g,"<br>")})};
+  return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),img:h["ছবি"]||"",tags:(h["ট্যাগ"]||"").split(/[,،，]/).map(x=>esc(x.trim())).filter(Boolean).slice(0,8),intro:esc((paras.find(p=>!/^\[ছবি:/.test(p))||"").slice(0,70))+"…",body:paras.map(p=>{const m=p.match(/^\[ছবি:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?))?\s*\]$/);return m?pic(m[1],m[2]):esc(p).replace(/\n/g,"<br>")})};
 }
 async function loadRepoStories(){
   try{
@@ -272,7 +280,7 @@ function ownerMode(){
   $("#send").onclick=()=>{
     const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
     if(!t||!a||b.length<80){m.textContent="গল্পের নাম, লেখকের নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
-    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}${$("#f-i").value.trim()?"\nছবি: "+$("#f-i").value.trim():""}\n---\n${b}`;
+    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}${$("#f-g").value.trim()?"\nট্যাগ: "+$("#f-g").value.trim():""}${$("#f-i").value.trim()?"\nছবি: "+$("#f-i").value.trim():""}\n---\n${b}`;
     const base=`https://github.com/${o}/${r}/new/main?filename=${encodeURIComponent("stories/story"+Date.now()+".txt")}`;
     const full=base+"&value="+encodeURIComponent(txt),fits=full.length<7000;
     try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}
@@ -310,8 +318,11 @@ async function renderPending(){const el=$("#pending");el.innerHTML="";const u=wi
   el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const id=b.dataset.ok||b.dataset.no,d=l.find(z=>z.id===id);if(!d)return;b.disabled=true;
    try{if(b.dataset.ok)await db.collection("published").add({...d.data(),status:"approved"});await db.doc("submissions/"+id).update({status:b.dataset.ok?"approved":"rejected"});renderPending();loadPub()}catch(er){b.disabled=false}}}catch(e){}}
 function closeMenu(){$("#drawer").hidden=true;$("#cdrop").hidden=true;$("#mbtn").setAttribute("aria-expanded","false")}
-$("#mbtn").onclick=()=>{const d=$("#drawer"),open=d.hidden;if(open){$("#dcats").innerHTML=cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("")||`<span class="stats">এখনো কোনো বিভাগ নেই</span>`;$("#hs").hidden=true}d.hidden=!open;$("#mbtn").setAttribute("aria-expanded",String(open))};
+$("#mbtn").onclick=()=>{const d=$("#drawer"),open=d.hidden;if(open){$("#dtags").innerHTML=[...new Set(STORIES.flatMap(s=>s.tags||[]))].map(t=>`<button class="chip" data-t="${t}">🏷️ ${t}</button>`).join("")||`<span class="stats">এখনো কোনো ট্যাগ নেই</span>`;$("#dcats").innerHTML=cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("")||`<span class="stats">এখনো কোনো বিভাগ নেই</span>`;$("#hs").hidden=true}d.hidden=!open;$("#mbtn").setAttribute("aria-expanded",String(open))};
 $("#dcats").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
+$("#dtags").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;tg=b.dataset.t;cat="সব";renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
+$("#r-tags").onclick=e=>{const b=e.target.closest(".mt");if(!b)return;if(b.dataset.k==="c"){cat=b.dataset.v;tg=""}else{tg=b.dataset.v;cat="সব"}renderFilters();renderList();go("");window.scrollTo(0,0)};
+$("#tgbar").onclick=e=>{if(e.target.closest("button")){tg="";renderList()}};
 $("#dfav").onclick=()=>{cat=FAV;renderFilters();renderList();closeMenu();go("")};
 $("#drnd").onclick=()=>{closeMenu();$("#rnd").click()};
 $("#drawer").addEventListener("click",e=>{if(e.target.closest(".nv button"))closeMenu()});
@@ -321,7 +332,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();$("#hs"
 function sendStory(kind){
   const t=$("#w-t").value.trim(),a=$("#w-a").value.trim(),c=$("#w-c").value.trim()||"অন্যান্য",b=$("#w-b").value.trim(),m=$("#w-msg");
   if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
-  const txt=`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}\n---\n${b}`,mail=kind==="mail";
+  const txt=`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}${$("#w-g").value.trim()?"\nট্যাগ: "+$("#w-g").value.trim():""}\n---\n${b}`,mail=kind==="mail";
   const base=mail?`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("গল্প: "+t)}`:`https://wa.me/${CONTACT_WA}`;
   const full=base+(mail?"&body=":"?text=")+encodeURIComponent(txt),big=full.length>(mail?6000:3500);
   if(big){try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}}
@@ -334,13 +345,13 @@ $("#w-send").onclick=async()=>{
   const t=$("#w-t").value.trim(),a=$("#w-a").value.trim(),c=$("#w-c").value.trim()||"অন্যান্য",b=$("#w-b").value.trim(),e=$("#w-e").value.trim(),m=$("#w-msg");
   if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
   const btn=$("#w-send");btn.disabled=true;m.textContent="পাঠানো হচ্ছে…";
-  const body={access_key:WEB3_KEY,subject:"নতুন গল্প: "+t,from_name:a,name:a,message:`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}\n---\n${b}`};
+  const body={access_key:WEB3_KEY,subject:"নতুন গল্প: "+t,from_name:a,name:a,message:`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}${$("#w-g").value.trim()?"\nট্যাগ: "+$("#w-g").value.trim():""}\n---\n${b}`};
   if(/^\S+@\S+\.\S+$/.test(e))body.email=e;
   try{
     const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)});
     const d=await r.json();if(!d.success)throw 0;
     m.textContent="ধন্যবাদ! আপনার গল্প জমা হয়েছে। যাচাইয়ের পর ভালো লাগলে সাইটে প্রকাশ করা হবে।";
-    ["w-t","w-a","w-c","w-b","w-e"].forEach(i=>$("#"+i).value="");
+    ["w-t","w-a","w-c","w-g","w-b","w-e"].forEach(i=>$("#"+i).value="");
   }catch(err){m.textContent="গল্প পাঠানো যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।"}
   btn.disabled=false;
 };
