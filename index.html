@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+header.top .acts{display:flex;gap:8px}
+.drawer{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 14px}
+.drawer[hidden],.hsearch[hidden]{display:none}
+.drawer .nv{flex-direction:column;gap:0}.drawer .nv button{text-align:left;padding:10px 6px;border-radius:8px;font-size:17px;width:100%}
+.dsec{color:var(--mute);font-size:14px;margin:12px 0 6px}
+.dcats,.dact{display:flex;flex-wrap:wrap;gap:8px}
+.hsearch{margin:0 0 12px}.hsearch .search{margin-top:0}
 .pic{display:block;max-width:100%;height:auto;border-radius:14px;margin:6px 0}.pic.th{width:100%;max-height:200px;object-fit:cover;margin:0 0 12px}.cap{display:block;color:var(--mute);font-size:.8em;text-align:center;margin-top:6px}
 .cm,.lkrow,#dl,.nv [data-g="submit"]{display:none!important}
 :root{--bg:#FCE4EC;--ink:#5C0F34;--mute:#8A4A66;--accent:#C2185B;--line:#E5A3BD;--card:#FEF1F6;
@@ -69,10 +76,16 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
   <div class="prog" id="prog"></div>
   <header class="top">
     <button class="brand" id="home-btn">গল্পকথা</button>
-    <nav class="nv"><button data-g="">গল্প</button><button data-g="authors">লেখক</button><button data-g="submit">গল্প পাঠান</button></nav>
-    <button class="tool" id="theme" aria-label="থিম বদলান">🌓 থিম</button>
+    <span class="acts"><button class="tool" id="sbtn" aria-label="গল্প খুঁজুন">🔍 খুঁজুন</button><button class="tool" id="mbtn" aria-expanded="false" aria-controls="drawer">☰ মেনু</button></span>
   </header>
   <hr class="stitch">
+  <div class="drawer" id="drawer" hidden>
+    <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="submit">গল্প পাঠান</button></nav>
+    <div class="dsec">বিভাগ</div><div class="dcats" id="dcats"></div>
+    <div class="dsec">আরও</div>
+    <div class="dact"><button class="tool" id="dfav">♥ পছন্দের গল্প</button><button class="tool" id="drnd">🎲 এলোমেলো গল্প</button><button class="tool" id="theme" aria-label="থিম বদলান">🌓 থিম</button></div>
+  </div>
+  <div class="hsearch" id="hs" hidden><input class="search" id="hq" type="search" placeholder="গল্প খুঁজুন…" aria-label="গল্প খুঁজুন"></div>
 
   <main class="home">
     <section class="hero">
@@ -135,7 +148,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <div id="pending"></div>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ৭</footer>
+  <footer>© গল্পকথা · সংস্করণ ৮</footer>
 </div>
 
 <script>
@@ -254,7 +267,7 @@ $("#theme").onclick=()=>{
   const dark=root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
   root.dataset.theme=dark?"light":"dark";try{localStorage.setItem("theme",root.dataset.theme)}catch(e){}
 };
-$("#q").addEventListener("input",e=>{q=e.target.value.trim();renderList()});
+$("#q").addEventListener("input",e=>{q=e.target.value.trim();$("#hq").value=e.target.value;renderList()});
 $("#fav").onclick=()=>{const i=favs.indexOf(curId);i>=0?favs.splice(i,1):favs.push(curId);try{localStorage.setItem("fav",JSON.stringify(favs))}catch(e){}paintFav();renderList()};
 function renderAuthors(){const m=new Map();STORIES.forEach(s=>{m.has(s.author)||m.set(s.author,[]);m.get(s.author).push(s)});
   $("#authors").innerHTML=[...m].map(([n,l])=>`<div class="au"><h2>${n}</h2><p>${Object.hasOwn(BIO,n)?BIO[n]:"গল্পকথার লেখক।"} ${l.length}টি গল্প।</p>${l.map(s=>`<button class="lk" data-id="${s.id}">${s.title}</button>`).join("")}</div>`).join("")}
@@ -266,6 +279,15 @@ async function renderPending(){const el=$("#pending");el.innerHTML="";const u=wi
   el.innerHTML=`<h2 class="ph" style="font-size:26px">অপেক্ষমাণ গল্প (${l.length})</h2>`+l.map(d=>{const x=d.data();return `<div class="au"><h3>${esc(x.title)}</h3><p>${esc(x.author)} | ${esc(x.cat)}</p><p>${esc(String(x.text).slice(0,200))}…</p><button class="tool" data-ok="${d.id}">প্রকাশ করুন</button> <button class="tool" data-no="${d.id}">বাদ দিন</button></div>`}).join("");
   el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const id=b.dataset.ok||b.dataset.no,d=l.find(z=>z.id===id);if(!d)return;b.disabled=true;
    try{if(b.dataset.ok)await db.collection("published").add({...d.data(),status:"approved"});await db.doc("submissions/"+id).update({status:b.dataset.ok?"approved":"rejected"});renderPending();loadPub()}catch(er){b.disabled=false}}}catch(e){}}
+function closeMenu(){$("#drawer").hidden=true;$("#mbtn").setAttribute("aria-expanded","false")}
+$("#mbtn").onclick=()=>{const d=$("#drawer"),open=d.hidden;if(open){$("#dcats").innerHTML=cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("")||`<span class="stats">এখনো কোনো বিভাগ নেই</span>`;$("#hs").hidden=true}d.hidden=!open;$("#mbtn").setAttribute("aria-expanded",String(open))};
+$("#dcats").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
+$("#dfav").onclick=()=>{cat=FAV;renderFilters();renderList();closeMenu();go("")};
+$("#drnd").onclick=()=>{closeMenu();$("#rnd").click()};
+$("#drawer").addEventListener("click",e=>{if(e.target.closest(".nv button"))closeMenu()});
+$("#sbtn").onclick=()=>{const h=$("#hs");closeMenu();h.hidden=!h.hidden;if(!h.hidden)$("#hq").focus()};
+$("#hq").addEventListener("input",e=>{q=e.target.value.trim();$("#q").value=e.target.value;if(location.hash.length>1)go("");renderList()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();$("#hs").hidden=true}});
 $(".nv").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.g)};
 $("#authors").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
 $("#rel").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
