@@ -8,6 +8,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+.mbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 8px;margin:12px 0}
+.mbar button{background:none;border:0;padding:8px 10px;font-size:16px;border-radius:10px;white-space:nowrap}.mbar button:hover{color:var(--accent)}
+.cdrop{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.cdrop[hidden],.tool[hidden]{display:none}
+.solid{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.v-send .w-pg{display:block}.v-send .home{display:none}
 header.top .acts{display:flex;gap:8px}
 .drawer{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 14px}
 .drawer[hidden],.hsearch[hidden]{display:none}
@@ -76,11 +82,18 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
   <div class="prog" id="prog"></div>
   <header class="top">
     <button class="brand" id="home-btn">গল্পকথা</button>
-    <span class="acts"><button class="tool" id="sbtn" aria-label="গল্প খুঁজুন">🔍 খুঁজুন</button><button class="tool" id="mbtn" aria-expanded="false" aria-controls="drawer">☰ মেনু</button></span>
+    
   </header>
   <hr class="stitch">
+  <div class="mbar">
+    <button id="mbtn" aria-label="মেনু" aria-expanded="false" aria-controls="drawer">☰</button>
+    <button id="cbtn" aria-label="বিভাগ">বিভাগ ⌄</button>
+    <button id="wbtn">গল্প লিখে পাঠান</button>
+    <button id="sbtn" aria-label="গল্প খুঁজুন">🔍</button>
+    <div class="cdrop" id="cdrop" hidden></div>
+  </div>
   <div class="drawer" id="drawer" hidden>
-    <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="submit">গল্প পাঠান</button></nav>
+    <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="send">✉️ গল্প লিখে পাঠান</button><button data-g="submit">গল্প পাঠান</button></nav>
     <div class="dsec">বিভাগ</div><div class="dcats" id="dcats"></div>
     <div class="dsec">আরও</div>
     <div class="dact"><button class="tool" id="dfav">♥ পছন্দের গল্প</button><button class="tool" id="drnd">🎲 এলোমেলো গল্প</button><button class="tool" id="theme" aria-label="থিম বদলান">🌓 থিম</button></div>
@@ -148,11 +161,25 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <div id="pending"></div>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ৮</footer>
+  <section class="pg w-pg">
+    <h1 class="ph">গল্প লিখে পাঠান</h1>
+    <p class="sub">আপনার লেখা গল্প আমাদের পাঠান। যাচাইয়ের পর ভালো লাগলে সাইটে প্রকাশ করা হবে। শুধু নিজের লেখা গল্প পাঠান।</p>
+    <input class="fi" id="w-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
+    <input class="fi" id="w-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
+    <input class="fi" id="w-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" list="cat-list" aria-label="বিভাগ">
+    <textarea class="fi" id="w-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
+    <button class="tool solid" id="w-mail">ইমেইলে পাঠান</button>
+    <button class="tool solid" id="w-wa">হোয়াটসঅ্যাপে পাঠান</button>
+    <p id="w-msg" class="sub" role="status" style="margin-top:12px"></p>
+  </section>
+
+  <footer>© গল্পকথা · সংস্করণ ৯</footer>
 </div>
 
 <script>
 /* নিজের গল্প যোগ করতে এই তালিকায় নতুন একটি অবজেক্ট বসান */
+/* গল্প গ্রহণের ঠিকানা: নিচের দুই লাইনের ফাঁকা ঘরে ইমেইল ও হোয়াটসঅ্যাপ নম্বর (দেশের কোডসহ, + ছাড়া, যেমন 8801XXXXXXXXX) লিখুন */
+const CONTACT_EMAIL="",CONTACT_WA="";
 const STORIES=[];
 const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
 let cat="সব", fs=20, q="", favs=[], curId="";
@@ -178,7 +205,7 @@ function renderList(){
 }
 function show(id){
   const i=STORIES.findIndex(s=>s.id===id);
-  app.classList.remove("reading","v-authors","v-submit");showCont();if(id==="authors"||id==="submit"){app.classList.add("v-"+id);if(id==="submit")renderPending();window.scrollTo(0,0);return}if(i<0)return;
+  app.classList.remove("reading","v-authors","v-submit");showCont();if(id==="authors"||id==="submit"||id==="send"){app.classList.add("v-"+id);if(id==="submit")renderPending();window.scrollTo(0,0);return}if(i<0)return;
   const s=STORIES[i];
   $("#r-title").textContent=s.title;curId=s.id;paintFav();try{localStorage.setItem("last",s.id)}catch(e){}
   try{if(!$("#cmname").value)$("#cmname").value=localStorage.getItem("cname")||""}catch(e){}
@@ -279,7 +306,7 @@ async function renderPending(){const el=$("#pending");el.innerHTML="";const u=wi
   el.innerHTML=`<h2 class="ph" style="font-size:26px">অপেক্ষমাণ গল্প (${l.length})</h2>`+l.map(d=>{const x=d.data();return `<div class="au"><h3>${esc(x.title)}</h3><p>${esc(x.author)} | ${esc(x.cat)}</p><p>${esc(String(x.text).slice(0,200))}…</p><button class="tool" data-ok="${d.id}">প্রকাশ করুন</button> <button class="tool" data-no="${d.id}">বাদ দিন</button></div>`}).join("");
   el.onclick=async e=>{const b=e.target.closest("button");if(!b)return;const id=b.dataset.ok||b.dataset.no,d=l.find(z=>z.id===id);if(!d)return;b.disabled=true;
    try{if(b.dataset.ok)await db.collection("published").add({...d.data(),status:"approved"});await db.doc("submissions/"+id).update({status:b.dataset.ok?"approved":"rejected"});renderPending();loadPub()}catch(er){b.disabled=false}}}catch(e){}}
-function closeMenu(){$("#drawer").hidden=true;$("#mbtn").setAttribute("aria-expanded","false")}
+function closeMenu(){$("#drawer").hidden=true;$("#cdrop").hidden=true;$("#mbtn").setAttribute("aria-expanded","false")}
 $("#mbtn").onclick=()=>{const d=$("#drawer"),open=d.hidden;if(open){$("#dcats").innerHTML=cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>`<button class="chip" data-c="${c}">${c}</button>`).join("")||`<span class="stats">এখনো কোনো বিভাগ নেই</span>`;$("#hs").hidden=true}d.hidden=!open;$("#mbtn").setAttribute("aria-expanded",String(open))};
 $("#dcats").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
 $("#dfav").onclick=()=>{cat=FAV;renderFilters();renderList();closeMenu();go("")};
@@ -288,6 +315,23 @@ $("#drawer").addEventListener("click",e=>{if(e.target.closest(".nv button"))clos
 $("#sbtn").onclick=()=>{const h=$("#hs");closeMenu();h.hidden=!h.hidden;if(!h.hidden)$("#hq").focus()};
 $("#hq").addEventListener("input",e=>{q=e.target.value.trim();$("#q").value=e.target.value;if(location.hash.length>1)go("");renderList()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMenu();$("#hs").hidden=true}});
+function sendStory(kind){
+  const t=$("#w-t").value.trim(),a=$("#w-a").value.trim(),c=$("#w-c").value.trim()||"অন্যান্য",b=$("#w-b").value.trim(),m=$("#w-msg");
+  if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
+  const txt=`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}\n---\n${b}`,mail=kind==="mail";
+  const base=mail?`mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("গল্প: "+t)}`:`https://wa.me/${CONTACT_WA}`;
+  const full=base+(mail?"&body=":"?text=")+encodeURIComponent(txt),big=full.length>(mail?6000:3500);
+  if(big){try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}}
+  if(mail)location.href=big?base:full;else window.open(big?base:full,"_blank");
+  m.textContent=big?"গল্পটি কপি করা হয়েছে। খোলা অ্যাপে লেখার ঘরে পেস্ট করে পাঠিয়ে দিন।":"ধন্যবাদ! খোলা অ্যাপ থেকে পাঠিয়ে দিন।";
+}
+$("#w-mail").hidden=!CONTACT_EMAIL;$("#w-wa").hidden=!CONTACT_WA;
+if(!CONTACT_EMAIL&&!CONTACT_WA)$("#w-msg").textContent="গল্প গ্রহণের ঠিকানা শিগগিরই যোগ করা হবে।";
+$("#w-mail").onclick=()=>sendStory("mail");$("#w-wa").onclick=()=>sendStory("wa");
+$("#cbtn").onclick=()=>{const d=$("#cdrop"),open=d.hidden;closeMenu();$("#hs").hidden=true;if(open){d.innerHTML=[["সব","সব গল্প"],...cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>[c,c])].map(([v,l])=>`<button class="chip" data-c="${v}">${l}</button>`).join("");d.hidden=false}};
+$("#cdrop").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
+$("#wbtn").onclick=()=>{closeMenu();$("#hs").hidden=true;go("send")};
+document.addEventListener("click",e=>{if(!e.target.closest(".mbar"))$("#cdrop").hidden=true});
 $(".nv").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.g)};
 $("#authors").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
 $("#rel").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
