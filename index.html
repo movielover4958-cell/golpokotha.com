@@ -168,18 +168,20 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <input class="fi" id="w-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
     <input class="fi" id="w-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" list="cat-list" aria-label="বিভাগ">
     <textarea class="fi" id="w-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
+    <input class="fi" id="w-e" type="email" placeholder="আপনার ইমেইল (ঐচ্ছিক, যোগাযোগের জন্য)" maxlength="80" aria-label="আপনার ইমেইল">
+    <button class="tool solid" id="w-send">গল্প জমা দিন</button>
     <button class="tool solid" id="w-mail">ইমেইলে পাঠান</button>
     <button class="tool solid" id="w-wa">হোয়াটসঅ্যাপে পাঠান</button>
     <p id="w-msg" class="sub" role="status" style="margin-top:12px"></p>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ৯</footer>
+  <footer>© গল্পকথা · সংস্করণ ১০</footer>
 </div>
 
 <script>
 /* নিজের গল্প যোগ করতে এই তালিকায় নতুন একটি অবজেক্ট বসান */
-/* গল্প গ্রহণের ঠিকানা: নিচের দুই লাইনের ফাঁকা ঘরে ইমেইল ও হোয়াটসঅ্যাপ নম্বর (দেশের কোডসহ, + ছাড়া, যেমন 8801XXXXXXXXX) লিখুন */
-const CONTACT_EMAIL="",CONTACT_WA="";
+/* গল্প গ্রহণ: WEB3_KEY = web3forms.com থেকে পাওয়া কী (পাঠক সাইটেই গল্প লিখে জমা দিলে আপনার ইমেইলে আসবে)। চাইলে CONTACT_EMAIL ও CONTACT_WA (দেশের কোডসহ, + ছাড়া, যেমন 8801XXXXXXXXX) দিতে পারেন */
+const CONTACT_EMAIL="",CONTACT_WA="",WEB3_KEY="";
 const STORIES=[];
 const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
 let cat="সব", fs=20, q="", favs=[], curId="";
@@ -325,8 +327,22 @@ function sendStory(kind){
   if(mail)location.href=big?base:full;else window.open(big?base:full,"_blank");
   m.textContent=big?"গল্পটি কপি করা হয়েছে। খোলা অ্যাপে লেখার ঘরে পেস্ট করে পাঠিয়ে দিন।":"ধন্যবাদ! খোলা অ্যাপ থেকে পাঠিয়ে দিন।";
 }
-$("#w-mail").hidden=!CONTACT_EMAIL;$("#w-wa").hidden=!CONTACT_WA;
-if(!CONTACT_EMAIL&&!CONTACT_WA)$("#w-msg").textContent="গল্প গ্রহণের ঠিকানা শিগগিরই যোগ করা হবে।";
+$("#w-send").hidden=!WEB3_KEY;$("#w-mail").hidden=!CONTACT_EMAIL;$("#w-wa").hidden=!CONTACT_WA;
+if(!WEB3_KEY&&!CONTACT_EMAIL&&!CONTACT_WA)$("#w-msg").textContent="গল্প গ্রহণের ব্যবস্থা শিগগিরই চালু হবে।";
+$("#w-send").onclick=async()=>{
+  const t=$("#w-t").value.trim(),a=$("#w-a").value.trim(),c=$("#w-c").value.trim()||"অন্যান্য",b=$("#w-b").value.trim(),e=$("#w-e").value.trim(),m=$("#w-msg");
+  if(!t||!a||b.length<80){m.textContent="গল্পের নাম, আপনার নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
+  const btn=$("#w-send");btn.disabled=true;m.textContent="পাঠানো হচ্ছে…";
+  const body={access_key:WEB3_KEY,subject:"নতুন গল্প: "+t,from_name:a,name:a,message:`শিরোনাম: ${t}\nবিভাগ: ${c}\nলেখক: ${a}\n---\n${b}`};
+  if(/^\S+@\S+\.\S+$/.test(e))body.email=e;
+  try{
+    const r=await fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(body)});
+    const d=await r.json();if(!d.success)throw 0;
+    m.textContent="ধন্যবাদ! আপনার গল্প জমা হয়েছে। যাচাইয়ের পর ভালো লাগলে সাইটে প্রকাশ করা হবে।";
+    ["w-t","w-a","w-c","w-b","w-e"].forEach(i=>$("#"+i).value="");
+  }catch(err){m.textContent="গল্প পাঠানো যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।"}
+  btn.disabled=false;
+};
 $("#w-mail").onclick=()=>sendStory("mail");$("#w-wa").onclick=()=>sendStory("wa");
 $("#cbtn").onclick=()=>{const d=$("#cdrop"),open=d.hidden;closeMenu();$("#hs").hidden=true;if(open){d.innerHTML=[["সব","সব গল্প"],...cats.filter(c=>c!=="সব"&&c!==FAV).map(c=>[c,c])].map(([v,l])=>`<button class="chip" data-c="${v}">${l}</button>`).join("");d.hidden=false}};
 $("#cdrop").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderFilters();renderList();closeMenu();go("");window.scrollTo(0,0)};
