@@ -125,7 +125,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <p class="sub">যাচাইয়ের পর গল্প সাইটে প্রকাশ করা হবে। শুধু নিজের লেখা গল্প পাঠান।</p>
     <input class="fi" id="f-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
     <input class="fi" id="f-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
-    <select class="fi" id="f-c" aria-label="বিভাগ"></select>
+    <input class="fi" id="f-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" aria-label="বিভাগ" list="cat-list"><datalist id="cat-list"></datalist>
     <textarea class="fi" id="f-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
     <button class="tool" id="send">গল্প জমা দিন</button>
     <p id="msg" class="sub" role="status" style="margin-top:12px"></p>
@@ -154,8 +154,8 @@ try{favs=JSON.parse(localStorage.getItem("fav")||"[]")}catch(e){}
 if(!Array.isArray(favs))favs=[];
 const FAV="♥ পছন্দের";
 const ICON={"জীবনের গল্প":"🌧️","ভূতের গল্প":"👻","শিশুদের গল্প":"🚣","রহস্য":"🔍","প্রেমের গল্প":"💌","রোমান্টিক গল্প":"🌹","পারিবারিক গল্প":"🏡","সামাজিক গল্প":"🤝","গোয়েন্দা গল্প":"🕵️","রোমাঞ্চ ও থ্রিলার":"⚡","হাসির গল্প":"😄","কিশোর গল্প":"🎒","ফ্যান্টাসি ও রূপকথা":"🧚","বিজ্ঞান কল্পকাহিনি":"🚀","ঐতিহাসিক গল্প":"🏛️","মুক্তিযুদ্ধের গল্প":"🇧🇩","ভ্রমণের গল্প":"🧭","অনুপ্রেরণামূলক গল্প":"🌟","নীতিকথা":"📜"},ic=c=>ICON[c]||"📖";
-const BASE=STORIES.length,cats=[],CATS=["জীবনের গল্প","প্রেমের গল্প","রোমান্টিক গল্প","পারিবারিক গল্প","সামাজিক গল্প","ভূতের গল্প","রহস্য","গোয়েন্দা গল্প","রোমাঞ্চ ও থ্রিলার","হাসির গল্প","শিশুদের গল্প","কিশোর গল্প","ফ্যান্টাসি ও রূপকথা","বিজ্ঞান কল্পকাহিনি","ঐতিহাসিক গল্প","মুক্তিযুদ্ধের গল্প","ভ্রমণের গল্প","অনুপ্রেরণামূলক গল্প","নীতিকথা","অন্যান্য"],BIO={"সুমাইয়া নূর":"নদী আর বর্ষার গল্প লিখতে ভালোবাসেন। (নমুনা পরিচিতি)","তানভীর হাসান":"গ্রামবাংলার ভূতের গল্পের কারিগর। (নমুনা পরিচিতি)"};
-const setCats=()=>{cats.length=0;cats.push("সব",FAV,...new Set([...CATS,...STORIES.map(s=>s.cat)]))};setCats();
+const BASE=STORIES.length,cats=[],CATS=[],BIO={"সুমাইয়া নূর":"নদী আর বর্ষার গল্প লিখতে ভালোবাসেন। (নমুনা পরিচিতি)","তানভীর হাসান":"গ্রামবাংলার ভূতের গল্পের কারিগর। (নমুনা পরিচিতি)"};
+const setCats=()=>{cats.length=0;cats.push("সব",FAV,...new Set([...CATS,...STORIES.map(s=>s.cat)]));{const dl=document.getElementById("cat-list");if(dl)dl.innerHTML=[...new Set(STORIES.map(s=>s.cat))].map(c=>`<option value="${c}">`).join("")}};setCats();
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const getDb=()=>window.claude?claude.use("db"):Promise.resolve(null);
 
@@ -197,6 +197,48 @@ async function loadComments(){const L=$("#cmlist");L.innerHTML="";const id=curId
   try{const sn=await db.collection("comments").where("s","==",id).get();if(id!==curId)return;const me=await uid();let ow=false;try{const u=await claude.use("user");ow=!!(u&&u.isOwner())}catch(e){}
   const l=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>a.at-b.at);
   L.innerHTML=l.length?l.map(c=>`<div class="au"><h3 style="font-size:17px">${esc(c.n)}</h3><p style="color:var(--ink)">${esc(c.t)}</p>${ow||(me&&c.u===me)?`<button class="tool" data-del="${esc(c.id)}">মুছুন</button>`:""}</div>`).join(""):`<p class="sub">এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্যটি আপনিই করুন।</p>`}catch(e){}}
+/* গল্প যোগ: রিপোজিটরির stories ফোল্ডারে .txt ফাইল রাখলেই সাইটে চলে আসে */
+function parseStory(name,raw){
+  const t=raw.replace(/\r/g,"").replace(/^\uFEFF/,""),m=t.match(/^([\s\S]*?)\n-{3,}[ \t]*\n([\s\S]*)$/);
+  if(!m)return null;
+  const h={};m[1].split("\n").forEach(l=>{const i=l.indexOf(":");if(i>0)h[l.slice(0,i).trim()]=l.slice(i+1).trim()});
+  const title=h["শিরোনাম"],paras=m[2].split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+  if(!title||!paras.length)return null;
+  const len=paras.join("").length;
+  return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),intro:esc(paras[0].slice(0,70))+"…",body:paras.map(p=>esc(p).replace(/\n/g,"<br>"))};
+}
+async function loadRepoStories(){
+  try{
+    const h=location.hostname,r=location.pathname.split("/")[1];
+    if(!h.endsWith(".github.io")||!r)return;
+    const res=await fetch(`https://api.github.com/repos/${h.split(".")[0]}/${r}/contents/stories`);if(!res.ok)return;
+    const files=(await res.json()).filter(f=>/\.txt$/i.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).slice(0,60);
+    const got=await Promise.all(files.map(async f=>{try{return parseStory(f.name,await (await fetch("stories/"+encodeURIComponent(f.name))).text())}catch(e){return null}}));
+    STORIES.length=BASE;got.filter(Boolean).forEach(x=>STORIES.push(x));
+    setCats();renderFilters();renderList();renderAuthors();show(location.hash.slice(1));
+  }catch(e){}
+}
+/* মালিকের জন্য: গল্প লিখে GitHub-এ প্রকাশ */
+function ownerMode(){
+  if(window.claude)return;
+  const h=location.hostname,r=location.pathname.split("/")[1];
+  if(!h.endsWith(".github.io")||!r)return;
+  const o=h.split(".")[0];
+  document.querySelector(".s-pg .ph").textContent="নতুন গল্প যোগ করুন";
+  document.querySelector(".s-pg .sub").textContent="এটি সাইটের মালিকের জন্য। গল্প লিখে নিচের বোতাম চাপুন, GitHub-এর পাতা খুলবে, সেখানে শুধু Commit changes চাপুন।";
+  $("#send").textContent="GitHub-এ প্রকাশ করুন";
+  $("#f-a").placeholder="লেখকের নাম";$("#f-a").setAttribute("aria-label","লেখকের নাম");
+  $("#send").onclick=()=>{
+    const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
+    if(!t||!a||b.length<80){m.textContent="গল্পের নাম, লেখকের নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
+    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}\n---\n${b}`;
+    const base=`https://github.com/${o}/${r}/new/main?filename=${encodeURIComponent("stories/story"+Date.now()+".txt")}`;
+    const full=base+"&value="+encodeURIComponent(txt),fits=full.length<7000;
+    try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}
+    window.open(fits?full:base,"_blank");
+    m.textContent=fits?"GitHub-এর পাতা খুলেছে। সেখানে Commit changes চাপুন।":"গল্পটি কপি করা হয়েছে। GitHub-এর পাতায় লেখার ঘরে পেস্ট করে Commit changes চাপুন।";
+  };
+}
 function showCont(){let id="";try{id=localStorage.getItem("last")||""}catch(e){}const s=STORIES.find(x=>x.id===id),b=$("#cont");b.style.display=s?"inline-block":"none";if(s){b.textContent="▶ চালিয়ে পড়ুন";b.onclick=()=>go(s.id)}}
 function paintFav(){const on=favs.includes(curId),b=$("#fav");b.textContent=on?"♥ পছন্দের":"♡ পছন্দ";b.setAttribute("aria-pressed",on)}
 function upd(){const h=document.documentElement.scrollHeight-innerHeight;$("#prog").style.width=(h>0?Math.min(100,scrollY/h*100):0)+"%"}
@@ -247,7 +289,7 @@ $("#send").onclick=async()=>{const t=$("#f-t").value.trim(),a=$("#f-a").value.tr
   catch(e){m.textContent="গল্প জমা হয়নি। জমা দেওয়ার অনুমতি না থাকলে সাইটের মালিকের সঙ্গে যোগাযোগ করুন।"}};
 window.addEventListener("scroll",upd,{passive:true});
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
-renderFilters();renderList();renderAuthors();$("#f-c").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("");show(location.hash.slice(1));loadPub();loadLikes();
+renderFilters();renderList();renderAuthors();show(location.hash.slice(1));loadPub();loadLikes();loadRepoStories();ownerMode();
 </script>
 <script>document.querySelector('#sort option[value="pop"]')?.remove()</script>
 </body>
