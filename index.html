@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+.owner .nv [data-g="submit"]{display:block!important}footer a{color:var(--accent)}
 .tags{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.mt{background:none;border:1px solid var(--line);border-radius:999px;padding:2px 12px;font-size:14px;color:var(--accent)}.mt:hover{border-color:var(--accent)}.tgbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0;color:var(--mute)}.tgbar:empty{display:none}
 .mbar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 8px;margin:12px 0}
 .mbar button{background:none;border:0;padding:8px 10px;font-size:16px;border-radius:10px;white-space:nowrap}.mbar button:hover{color:var(--accent)}
@@ -95,7 +96,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <div class="cdrop" id="cdrop" hidden></div>
   </div>
   <div class="drawer" id="drawer" hidden>
-    <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="send">✉️ গল্প লিখে পাঠান</button><button data-g="submit">গল্প পাঠান</button></nav>
+    <nav class="nv"><button data-g="">🏠 সব গল্প</button><button data-g="authors">✍️ লেখক</button><button data-g="send">✉️ গল্প লিখে পাঠান</button><button data-g="submit">➕ নতুন গল্প যোগ করুন</button></nav>
     <div class="dsec">বিভাগ</div><div class="dcats" id="dcats"></div>
     <div class="dsec">ট্যাগ</div><div class="dcats" id="dtags"></div>
     <div class="dsec">আরও</div>
@@ -156,13 +157,17 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <h1 class="ph">আপনার গল্প পাঠান</h1>
     <p class="sub">যাচাইয়ের পর গল্প সাইটে প্রকাশ করা হবে। শুধু নিজের লেখা গল্প পাঠান।</p>
     <p class="sub" id="lstat"></p>
+    <div id="f-owner" style="display:none">
+      <div id="f-tokrow"><input class="fi" id="f-tok" type="password" placeholder="GitHub টোকেন (একবারই দিতে হবে)" autocomplete="off" aria-label="GitHub টোকেন"><div style="margin-top:10px"><button class="tool solid" id="f-toksave">টোকেন সংরক্ষণ</button> <button class="tool" id="f-tokmk">টোকেন বানান</button></div></div>
+      <p class="sub" id="f-tokok" style="display:none">✅ টোকেন সংরক্ষিত আছে। <button class="tool" id="f-tokdel">টোকেন মুছুন</button></p>
+    </div>
     <input class="fi" id="f-t" placeholder="গল্পের নাম" maxlength="80" aria-label="গল্পের নাম">
     <input class="fi" id="f-a" placeholder="আপনার নাম" maxlength="40" aria-label="আপনার নাম">
     <input class="fi" id="f-c" placeholder="বিভাগ লিখুন (যেমন: ভূতের গল্প)" maxlength="30" aria-label="বিভাগ" list="cat-list"><datalist id="cat-list"></datalist>
     <input class="fi" id="f-g" placeholder="ট্যাগ (কমা দিয়ে আলাদা করুন, ঐচ্ছিক)" maxlength="100" aria-label="ট্যাগ">
     <textarea class="fi" id="f-b" rows="10" placeholder="এখানে গল্প লিখুন…" aria-label="গল্প"></textarea>
     <input class="fi" id="f-i" placeholder="প্রচ্ছদ ছবির ফাইলের নাম (ঐচ্ছিক, যেমন cover1.jpg)" maxlength="80" aria-label="ছবির ফাইলের নাম" style="display:none">
-    <button class="tool" id="f-up" style="display:none;margin-right:8px">ছবি আপলোড করুন</button>
+    <button class="tool" id="f-up" style="display:none;margin-right:8px">ছবি যোগ করুন</button><input type="file" id="f-file" accept="image/*" multiple hidden>
     <button class="tool" id="send">গল্প জমা দিন</button>
     <p id="msg" class="sub" role="status" style="margin-top:12px"></p>
     <div id="pending"></div>
@@ -183,7 +188,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <p id="w-msg" class="sub" role="status" style="margin-top:12px"></p>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ১৩</footer>
+  <footer>© গল্পকথা · সংস্করণ ১৪ · <a href="#submit">মালিক</a></footer>
 </div>
 
 <script>
@@ -246,7 +251,7 @@ async function loadComments(){const L=$("#cmlist");L.innerHTML="";const id=curId
 function pic(n,c){
   n=String(n||"").trim();if(!n)return"";
   const ext=/^https?:\/\//i.test(n),f=encodeURIComponent(n).replace(/'/g,"%27");
-  return `<img class="pic" src="${esc(ext?n:f)}" alt="${esc(c||"")}" loading="lazy"${ext?"":` onerror="if(!this.dataset.f){this.dataset.f=1;this.src='images/${f}'}"`}>`+(c?`<span class="cap">${esc(c)}</span>`:"");
+  return `<img class="pic" src="${esc(ext?n:"images/"+f)}" alt="${esc(c||"")}" loading="lazy"${ext?"":` onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${f}'}"`}>`+(c?`<span class="cap">${esc(c)}</span>`:"");
 }
 function parseStory(name,raw){
   const lines=raw.replace(/\r/g,"").replace(/^\uFEFF/,"").split("\n"),h={};
@@ -264,6 +269,7 @@ function parseStory(name,raw){
   const len=paras.join("").length;
   return{id:"f"+[...name].map(c=>c.charCodeAt(0).toString(36)).join(""),title:esc(title),cat:esc(h["বিভাগ"]||"অন্যান্য"),author:esc(h["লেখক"]||"গল্পকথা"),min:Math.max(1,Math.round(len/900)),img:h["ছবি"]||"",tags:(h["ট্যাগ"]||"").split(/[,،，]/).map(x=>esc(x.trim())).filter(Boolean).slice(0,8),intro:esc((paras.find(p=>!/^\[ছবি:/.test(p))||"").slice(0,70))+"…",body:paras.map(p=>{const m=p.match(/^\[ছবি:\s*([^\]|]+?)\s*(?:\|\s*([^\]]*?))?\s*\]$/);return m?pic(m[1],m[2]):esc(p).replace(/\n/g,"<br>")})};
 }
+async function rawText(o,r,n){const e=encodeURIComponent(n);try{const x=await fetch(`https://raw.githubusercontent.com/${o}/${r}/main/stories/${e}?t=${Date.now()}`);if(x.ok)return await x.text()}catch(_){}return await (await fetch("stories/"+e+"?t="+Date.now())).text()}
 async function loadRepoStories(){
   const st=t=>{const e=document.getElementById("lstat");if(e)e.textContent=t};
   try{
@@ -279,7 +285,7 @@ async function loadRepoStories(){
     if(!names){st(why);return}
     names=names.sort((a,b)=>a.localeCompare(b)).slice(0,60);
     const bad=[];
-    const got=await Promise.all(names.map(async n=>{try{const x=parseStory(n,await (await fetch("stories/"+encodeURIComponent(n)+"?t="+Date.now())).text());if(!x)bad.push(n);return x}catch(e){bad.push(n);return null}}));
+    const got=await Promise.all(names.map(async n=>{try{const x=parseStory(n,await rawText(h.split(".")[0],r,n));if(!x)bad.push(n);return x}catch(e){bad.push(n);return null}}));
     STORIES.length=BASE;got.filter(Boolean).forEach(x=>STORIES.push(x));
     st(`stories ফোল্ডারে ${bn(names.length)}টি ফাইল, সাইটে দেখাচ্ছে ${bn(STORIES.length-BASE)}টি।`+(bad.length?` পড়া যায়নি: ${bad.join(", ")}`:"")+(why?" "+why:""));
     setCats();renderFilters();renderList();renderAuthors();show(location.hash.slice(1));
@@ -290,20 +296,57 @@ function ownerMode(){
   if(window.claude)return;
   const h=location.hostname,r=location.pathname.split("/")[1];
   if(!h.endsWith(".github.io")||!r)return;
-  const o=h.split(".")[0];
+  const o=h.split(".")[0],K="ghtok",m=$("#msg"),tok=()=>{try{return localStorage.getItem(K)||""}catch(e){return""}};
+  const api=p=>`https://api.github.com/repos/${o}/${r}/contents/${p.split("/").map(encodeURIComponent).join("/")}`;
+  const b64=u=>{let t="";for(let i=0;i<u.length;i+=8192)t+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(t)};
+  const put=async(path,u,msg)=>{const res=await fetch(api(path),{method:"PUT",headers:{Authorization:"Bearer "+tok(),Accept:"application/vnd.github+json","Content-Type":"application/json"},body:JSON.stringify({message:msg,content:b64(u),branch:"main"})});if(!res.ok){let t="";try{t=(await res.json()).message||""}catch(e){}throw new Error(res.status+" "+t)}};
+  const paint=()=>{const t=tok();document.documentElement.classList.toggle("owner",!!t);$("#f-tokrow").style.display=t?"none":"block";$("#f-tokok").style.display=t?"block":"none";$("#send").textContent=t?"সাইটে প্রকাশ করুন":"GitHub-এ প্রকাশ করুন"};
+  $("#f-owner").style.display="block";
   document.querySelector(".s-pg .ph").textContent="নতুন গল্প যোগ করুন";
-  document.querySelector(".s-pg .sub").textContent="এটি সাইটের মালিকের জন্য। ছবি দিতে চাইলে আগে “ছবি আপলোড করুন” চেপে ছবি তুলুন, তারপর ছবির ফাইলের নাম লিখুন। গল্পের ভেতরে ছবি বসাতে আলাদা লাইনে লিখুন [ছবি: নাম.jpg]। শেষে “GitHub-এ প্রকাশ করুন” চেপে Commit changes চাপুন।";
-  $("#send").textContent="GitHub-এ প্রকাশ করুন";$("#f-i").style.display="block";$("#f-up").style.display="inline-block";$("#f-up").onclick=()=>window.open(`https://github.com/${o}/${r}/upload/main`,"_blank");
+  document.querySelector(".s-pg .sub").textContent="এটি সাইটের মালিকের জন্য। গল্প লিখে “প্রকাশ করুন” চাপলে গল্প সরাসরি সাইটে চলে যাবে, অন্যদের ফোনে এক-দুই মিনিটে দেখা যাবে। প্রথমবার একটি GitHub টোকেন সংরক্ষণ করতে হবে।";
+  $("#f-i").style.display="block";$("#f-up").style.display="inline-block";
   $("#f-a").placeholder="লেখকের নাম";$("#f-a").setAttribute("aria-label","লেখকের নাম");
-  $("#send").onclick=()=>{
-    const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
+  paint();
+  $("#f-tokmk").onclick=()=>window.open("https://github.com/settings/personal-access-tokens/new","_blank");
+  $("#f-toksave").onclick=()=>{const v=$("#f-tok").value.trim();if(!v){m.textContent="টোকেন লিখুন।";return}try{localStorage.setItem(K,v)}catch(e){}$("#f-tok").value="";m.textContent="টোকেন সংরক্ষণ হয়েছে।";paint()};
+  $("#f-tokdel").onclick=()=>{try{localStorage.removeItem(K)}catch(e){}m.textContent="";paint()};
+  $("#f-up").onclick=()=>tok()?$("#f-file").click():window.open(`https://github.com/${o}/${r}/upload/main`,"_blank");
+  $("#f-file").onchange=async e=>{
+    const fs=[...e.target.files];e.target.value="";
+    for(const f of fs){
+      try{
+        m.textContent="ছবি আপলোড হচ্ছে…";
+        const bm=await createImageBitmap(f),k=Math.min(1,1600/Math.max(bm.width,bm.height)),c=document.createElement("canvas");
+        c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+        const blob=await new Promise(res=>c.toBlob(res,"image/jpeg",.82)),name="img"+Date.now()+".jpg";
+        await put("images/"+name,new Uint8Array(await blob.arrayBuffer()),"ছবি যোগ");
+        const ta=$("#f-b");
+        if(!$("#f-i").value.trim())$("#f-i").value=name;
+        else{const p=ta.selectionStart==null?ta.value.length:ta.selectionStart;ta.value=ta.value.slice(0,p)+"\n\n[ছবি: "+name+"]\n\n"+ta.value.slice(p)}
+        m.textContent="ছবি যোগ হয়েছে। প্রথম ছবি প্রচ্ছদ হবে, পরের ছবিগুলো গল্পের লেখার ভেতরে বসবে।";
+      }catch(err){m.textContent="ছবি আপলোড হয়নি: "+err.message;break}
+    }
+  };
+  $("#send").onclick=async()=>{
+    const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim();
     if(!t||!a||b.length<80){m.textContent="গল্পের নাম, লেখকের নাম এবং অন্তত ৮০ অক্ষরের গল্প লিখুন।";return}
-    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value}\nলেখক: ${a}${$("#f-g").value.trim()?"\nট্যাগ: "+$("#f-g").value.trim():""}${$("#f-i").value.trim()?"\nছবি: "+$("#f-i").value.trim():""}\n---\n${b}`;
-    const base=`https://github.com/${o}/${r}/new/main?filename=${encodeURIComponent("stories/story"+Date.now()+".txt")}`;
-    const full=base+"&value="+encodeURIComponent(txt),fits=full.length<7000;
-    try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}
-    window.open(fits?full:base,"_blank");
-    m.textContent=fits?"GitHub-এর পাতা খুলেছে। সেখানে Commit changes চাপুন।":"গল্পটি কপি করা হয়েছে। GitHub-এর পাতায় লেখার ঘরে পেস্ট করে Commit changes চাপুন।";
+    const g=$("#f-g").value.trim(),im=$("#f-i").value.trim(),name="story"+Date.now()+".txt";
+    const txt=`শিরোনাম: ${t}\nবিভাগ: ${$("#f-c").value.trim()||"অন্যান্য"}\nলেখক: ${a}${g?"\nট্যাগ: "+g:""}${im?"\nছবি: "+im:""}\n---\n${b}`;
+    if(!tok()){
+      const base=`https://github.com/${o}/${r}/new/main?filename=${encodeURIComponent("stories/"+name)}`,full=base+"&value="+encodeURIComponent(txt),fits=full.length<7000;
+      try{navigator.clipboard.writeText(txt).catch(()=>{})}catch(e){}
+      window.open(fits?full:base,"_blank");
+      m.textContent=fits?"GitHub-এর পাতা খুলেছে। সেখানে Commit changes চাপুন।":"গল্পটি কপি করা হয়েছে। GitHub-এর পাতায় পেস্ট করে Commit changes চাপুন।";return;
+    }
+    const btn=$("#send");btn.disabled=true;m.textContent="প্রকাশ করা হচ্ছে…";
+    try{
+      await put("stories/"+name,new TextEncoder().encode(txt),"নতুন গল্প: "+t);
+      const x=parseStory(name,txt);if(x){STORIES.push(x);setCats();renderFilters();renderList();renderAuthors()}
+      m.textContent="✅ গল্প প্রকাশ হয়েছে! অন্যদের ফোনে এক-দুই মিনিটের মধ্যে দেখা যাবে।";
+      ["f-t","f-a","f-c","f-g","f-b","f-i"].forEach(i=>$("#"+i).value="");
+      if(x)go(x.id);
+    }catch(err){m.textContent="প্রকাশ হয়নি: "+err.message+" (টোকেনটি ঠিক আছে কি না দেখুন)"}
+    btn.disabled=false;
   };
 }
 function showCont(){let id="";try{id=localStorage.getItem("last")||""}catch(e){}const s=STORIES.find(x=>x.id===id),b=$("#cont");b.style.display=s?"inline-block":"none";if(s){b.textContent="▶ চালিয়ে পড়ুন";b.onclick=()=>go(s.id)}}
