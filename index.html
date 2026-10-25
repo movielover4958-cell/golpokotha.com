@@ -24,7 +24,7 @@ header.top .acts{display:flex;gap:8px}
 .dcats,.dact{display:flex;flex-wrap:wrap;gap:8px}
 .hsearch{margin:0 0 12px}.hsearch .search{margin-top:0}
 .pic{display:block;max-width:100%;height:auto;border-radius:14px;margin:6px 0}.pic.th{width:100%;max-height:200px;object-fit:cover;margin:0 0 12px}.cap{display:block;color:var(--mute);font-size:.8em;text-align:center;margin-top:6px}
-#dl,.nv [data-g="submit"]{display:none!important}.nofb .cm,.nofb .lkrow{display:none}
+#dl,.nv [data-g="submit"]{display:none!important}.nofb .cm,.nofb .lkrow,.nofb .authbar{display:none}.authbar{margin-top:28px;text-align:center}.authbar .arow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}.authbar #a-ph{margin-top:10px}.authbar .sub{margin:0}
 :root{--bg:#FCE4EC;--ink:#5C0F34;--mute:#8A4A66;--accent:#C2185B;--line:#E5A3BD;--card:#FEF1F6;
  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2B0A1B;--ink:#FDE8F1;--mute:#D49BB5;--accent:#FF7FB0;--line:#6B2A4A;--card:#3A1026}}
@@ -134,6 +134,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <hr class="stitch">
     <div class="text" id="r-text"></div>
     <div class="end">• • •</div>
+    <div class="authbar" id="authbar"></div>
     <div class="lkrow"><button class="tool" id="like" aria-pressed="false">♡ ভালো লেগেছে · ০</button></div>
     <section class="cm"><h2>মন্তব্য</h2><div id="cmlist"></div>
       <input class="fi" id="cmname" maxlength="30" placeholder="আপনার নাম" aria-label="আপনার নাম">
@@ -188,7 +189,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
     <p id="w-msg" class="sub" role="status" style="margin-top:12px"></p>
   </section>
 
-  <footer>© গল্পকথা · সংস্করণ ১৫ · <a href="#submit">মালিক</a></footer>
+  <footer>© গল্পকথা · সংস্করণ ১৬ · <a href="#submit">মালিক</a></footer>
 </div>
 
 <script>
@@ -196,7 +197,7 @@ footer{margin-top:48px;color:var(--mute);font-size:14px;text-align:center}
 /* গল্প গ্রহণ: WEB3_KEY = web3forms.com থেকে পাওয়া কী (পাঠক সাইটেই গল্প লিখে জমা দিলে আপনার ইমেইলে আসবে)। চাইলে CONTACT_EMAIL ও CONTACT_WA (দেশের কোডসহ, + ছাড়া, যেমন 8801XXXXXXXXX) দিতে পারেন */
 const CONTACT_EMAIL="",CONTACT_WA="",WEB3_KEY="";
 /* লাইক ও মন্তব্য: Firebase প্রকল্পের projectId ও apiKey এখানে বসান */
-const FB={pid:"",key:""};
+const FB={pid:"",key:"",phone:false};
 const STORIES=[];
 const $=s=>document.querySelector(s), root=document.documentElement, app=$("#app");
 let cat="সব", tg="", fs=20, q="", favs=[], curId="";
@@ -243,7 +244,9 @@ function show(id){
 let srt="new";const LK={},MY=new Set(),bn=x=>x.toLocaleString("bn-BD");
 function sortItems(a){if(srt==="new")a.reverse();else if(srt==="pop")a.sort((x,y)=>(LK[y.id]||0)-(LK[x.id]||0));else if(srt==="short")a.sort((x,y)=>x.min-y.min);else if(srt==="alpha")a.sort((x,y)=>x.title.localeCompare(y.title,"bn"))}
 const fsOn=()=>!!(FB.pid&&FB.key),FSB=()=>`https://firestore.googleapis.com/v1/projects/${FB.pid}/databases/(default)/documents`,fsStr=v=>({stringValue:String(v)});
-function cid(){let c="";try{c=localStorage.getItem("cid")||""}catch(e){}if(!c){c=Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{localStorage.setItem("cid",c)}catch(e){}}return c}
+let USER=null,AUTH=null,RV=null,CR=null;
+function ldScript(u){return new Promise((ok,no)=>{const e=document.createElement("script");e.src=u;e.onload=ok;e.onerror=no;document.head.appendChild(e)})}
+async function fsH(){const h={"Content-Type":"application/json"};if(USER)h.Authorization="Bearer "+await USER.getIdToken();return h}
 async function fsQuery(coll,sid,lim){
   const q={from:[{collectionId:coll}],limit:lim};
   if(sid)q.where={fieldFilter:{field:{fieldPath:"s"},op:"EQUAL",value:fsStr(sid)}};
@@ -251,12 +254,30 @@ async function fsQuery(coll,sid,lim){
   if(!r.ok)throw new Error(r.status);
   return (await r.json()).filter(x=>x.document).map(x=>{const f=x.document.fields||{},o={id:x.document.name.split("/").pop()};for(const k in f)o[k]=f[k].stringValue!==undefined?f[k].stringValue:Number(f[k].integerValue);return o});
 }
-async function loadLikes(){if(!fsOn())return;try{const L=await fsQuery("likes",null,1000);Object.keys(LK).forEach(k=>delete LK[k]);MY.clear();L.forEach(x=>{LK[x.s]=(LK[x.s]||0)+1;if(x.id===x.s+"_"+cid())MY.add(x.s)});renderList();paintLike()}catch(e){}}
+function paintAuth(err){
+  const a=$("#authbar");if(!a)return;
+  if(err){a.innerHTML=`<p class="sub">${err}</p>`;return}
+  if(USER){
+    a.innerHTML=`<span class="sub">👤 ${esc(USER.displayName||USER.phoneNumber||"সদস্য")}</span> <button class="tool" id="a-out">লগআউট</button>`;
+    try{if(!$("#cmname").value)$("#cmname").value=(USER.displayName||"").split(" ")[0]}catch(e){}
+  }else a.innerHTML=`<span class="sub">লাইক ও মন্তব্য করতে লগইন করুন</span><div class="arow"><button class="tool solid" id="a-g">Google দিয়ে লগইন</button>${FB.phone?`<button class="tool" id="a-p">ফোন নম্বর দিয়ে লগইন</button>`:""}</div><div id="a-ph"></div><div id="rcap"></div>`;
+}
+async function initAuth(){
+  if(!fsOn())return;
+  try{
+    const b="https://www.gstatic.com/firebasejs/10.12.2/";
+    await ldScript(b+"firebase-app-compat.js");await ldScript(b+"firebase-auth-compat.js");
+    firebase.initializeApp({apiKey:FB.key,authDomain:FB.pid+".firebaseapp.com",projectId:FB.pid});
+    AUTH=firebase.auth();
+    AUTH.onAuthStateChanged(u=>{USER=u;paintAuth();loadLikes();if(curId)loadComments()});
+  }catch(e){paintAuth("লগইন ব্যবস্থা এখন লোড হয়নি।")}
+}
+async function loadLikes(){if(!fsOn())return;try{const L=await fsQuery("likes",null,1000);Object.keys(LK).forEach(k=>delete LK[k]);MY.clear();L.forEach(x=>{LK[x.s]=(LK[x.s]||0)+1;if(USER&&x.id===x.s+"_"+USER.uid)MY.add(x.s)});renderList();paintLike()}catch(e){}}
 function paintLike(){const b=$("#like"),on=MY.has(curId);b.textContent=(on?"♥":"♡")+" ভালো লেগেছে · "+bn(LK[curId]||0);b.setAttribute("aria-pressed",on)}
 async function loadComments(){
   const L=$("#cmlist");L.innerHTML="";if(!fsOn())return;const id=curId;
   try{const c=(await fsQuery("comments",id,200)).sort((a,b)=>a.at-b.at);if(id!==curId)return;
-  L.innerHTML=c.length?c.map(x=>`<div class="au"><h3 style="font-size:17px">${esc(x.n)}</h3><p style="color:var(--ink)">${esc(x.t)}</p></div>`).join(""):`<p class="sub">এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্যটি আপনিই করুন।</p>`}catch(e){L.innerHTML=`<p class="sub">মন্তব্য আনা যায়নি।</p>`}
+  L.innerHTML=c.length?c.map(x=>`<div class="au"><h3 style="font-size:17px">${esc(x.n)}</h3><p style="color:var(--ink)">${esc(x.t)}</p>${USER&&x.u===USER.uid?`<button class="tool" data-del="${esc(x.id)}">মুছুন</button>`:""}</div>`).join(""):`<p class="sub">এখনো কোনো মন্তব্য নেই। প্রথম মন্তব্যটি আপনিই করুন।</p>`}catch(e){L.innerHTML=`<p class="sub">মন্তব্য আনা যায়নি।</p>`}
 }
 if(!fsOn())document.documentElement.classList.add("nofb");
 /* গল্প যোগ: রিপোজিটরির stories ফোল্ডারে .txt ফাইল রাখলেই সাইটে চলে আসে */
@@ -437,30 +458,47 @@ $(".nv").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.g)};
 $("#authors").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
 $("#rel").onclick=e=>{const b=e.target.closest(".lk");if(b)go(b.dataset.id)};
 $("#sort").onchange=e=>{srt=e.target.value;renderList()};
+$("#authbar").onclick=async e=>{
+  const id=e.target.id,box=$("#a-ph"),say=t=>{if(box)box.innerHTML=`<p class="sub">${t}</p>`};
+  try{
+    if(id==="a-out")await AUTH.signOut();
+    else if(id==="a-g")await AUTH.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    else if(id==="a-p")box.innerHTML=`<input class="fi" id="a-num" type="tel" placeholder="+8801XXXXXXXXX" aria-label="ফোন নম্বর"><button class="tool solid" id="a-send" style="margin-top:10px">কোড পাঠান</button>`;
+    else if(id==="a-send"){
+      const num=$("#a-num").value.replace(/\s/g,"");
+      try{RV=RV||new firebase.auth.RecaptchaVerifier("rcap",{size:"invisible"});CR=await AUTH.signInWithPhoneNumber(num,RV)}catch(err){try{RV.clear()}catch(x){}RV=null;throw err}
+      box.innerHTML=`<input class="fi" id="a-code" inputmode="numeric" placeholder="SMS-এ আসা কোড" aria-label="কোড"><button class="tool solid" id="a-ok" style="margin-top:10px">নিশ্চিত করুন</button>`;
+    }else if(id==="a-ok")await CR.confirm($("#a-code").value.trim());
+  }catch(err){say("লগইন হয়নি। আবার চেষ্টা করুন।")}
+};
 $("#like").onclick=async()=>{
   const m=$("#cmmsg");if(!fsOn())return;
-  const id=curId,u=`${FSB()}/likes/${id}_${cid()}?key=${FB.key}`,on=MY.has(id);
+  if(!USER){m.textContent="লাইক দিতে আগে লগইন করুন।";$("#authbar").scrollIntoView({block:"center"});return}
+  const id=curId,u=`${FSB()}/likes/${id}_${USER.uid}?key=${FB.key}`,on=MY.has(id);
   try{
-    if(on){const r=await fetch(u,{method:"DELETE"});if(!r.ok)throw 0;MY.delete(id);LK[id]=Math.max(0,(LK[id]||1)-1)}
-    else{const r=await fetch(u,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{s:fsStr(id)}})});if(!r.ok)throw 0;MY.add(id);LK[id]=(LK[id]||0)+1}
-    paintLike();renderList();
+    const H=await fsH();
+    if(on){const r=await fetch(u,{method:"DELETE",headers:H});if(!r.ok)throw 0;MY.delete(id);LK[id]=Math.max(0,(LK[id]||1)-1)}
+    else{const r=await fetch(u,{method:"PATCH",headers:H,body:JSON.stringify({fields:{s:fsStr(id)}})});if(!r.ok)throw 0;MY.add(id);LK[id]=(LK[id]||0)+1}
+    m.textContent="";paintLike();renderList();
   }catch(e){m.textContent="এখন ভালো লাগা জানানো যাচ্ছে না।"}
 };
 $("#cmsend").onclick=async()=>{
   const m=$("#cmmsg"),n=$("#cmname").value.trim(),t=$("#cmtext").value.trim();
   if(!fsOn())return;
+  if(!USER){m.textContent="মন্তব্য করতে আগে লগইন করুন।";$("#authbar").scrollIntoView({block:"center"});return}
   if(!n||t.length<2){m.textContent="নাম ও মন্তব্য লিখুন।";return}
   let last=0;try{last=+localStorage.getItem("lastc")||0}catch(e){}
   if(Date.now()-last<30000){m.textContent="একটু অপেক্ষা করে আবার মন্তব্য করুন।";return}
   const btn=$("#cmsend");btn.disabled=true;
   try{
-    const r=await fetch(`${FSB()}/comments?key=${FB.key}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{s:fsStr(curId),n:fsStr(n.slice(0,30)),t:fsStr(t.slice(0,500)),at:{integerValue:String(Date.now())}}})});
+    const r=await fetch(`${FSB()}/comments?key=${FB.key}`,{method:"POST",headers:await fsH(),body:JSON.stringify({fields:{s:fsStr(curId),n:fsStr(n.slice(0,30)),t:fsStr(t.slice(0,500)),u:fsStr(USER.uid),at:{integerValue:String(Date.now())}}})});
     if(!r.ok)throw 0;
     try{localStorage.setItem("cname",n);localStorage.setItem("lastc",String(Date.now()))}catch(e){}
     $("#cmtext").value="";m.textContent="";loadComments();
   }catch(e){m.textContent="মন্তব্য জমা হয়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।"}
   btn.disabled=false;
 };
+$("#cmlist").onclick=async e=>{const b=e.target.closest("[data-del]");if(!b||!USER)return;try{const r=await fetch(`${FSB()}/comments/${b.dataset.del}?key=${FB.key}`,{method:"DELETE",headers:await fsH()});if(r.ok)loadComments()}catch(er){}};
 $("#dl").onclick=async()=>{const s=STORIES.find(x=>x.id===curId);if(!s)return;try{const d=await claude.use("downloads");if(d)await d.save({filename:s.title+".txt",data:s.title+"\n"+s.author+"\n\n"+s.body.join("\n\n")})}catch(e){}};
 $("#rnd").onclick=()=>{if(STORIES.length)go(STORIES[Math.floor(Math.random()*STORIES.length)].id)};
 $("#send").onclick=async()=>{const t=$("#f-t").value.trim(),a=$("#f-a").value.trim(),b=$("#f-b").value.trim(),m=$("#msg");
@@ -471,7 +509,7 @@ $("#send").onclick=async()=>{const t=$("#f-t").value.trim(),a=$("#f-a").value.tr
   catch(e){m.textContent="গল্প জমা হয়নি। জমা দেওয়ার অনুমতি না থাকলে সাইটের মালিকের সঙ্গে যোগাযোগ করুন।"}};
 window.addEventListener("scroll",upd,{passive:true});
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
-renderFilters();renderList();renderAuthors();show(location.hash.slice(1));loadPub();loadLikes();loadRepoStories();ownerMode();
+renderFilters();renderList();renderAuthors();show(location.hash.slice(1));loadPub();loadLikes();loadRepoStories();ownerMode();initAuth();
 </script>
 <script>document.querySelector('#sort option[value="pop"]')?.remove()</script>
 </body>
